@@ -1,0 +1,376 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@700&display=swap');
+
+/* ─── Root scene container (fixed viewport) ─── */
+.train-scene {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+  /* let scroll events pass through */
+}
+
+/* ─── Scroll spacer — creates scrollable height ─── */
+.scroll-spacer {
+  height: 400vh;
+  width: 100%;
+  position: relative;
+  z-index: 0;
+}
+
+/* ─── Shared layer base ─── */
+.scene-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ─── Global scaling container ─── */
+.master-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+/* ─── z-0: Background ─── */
+.layer-background {
+  z-index: 0;
+}
+
+.layer-background img {
+  width: 100vw;
+  height: 100vh;
+  object-fit: fill;
+  will-change: opacity, transform;
+}
+
+.layer-background-blur {
+  opacity: 0;
+  z-index: 1;
+}
+
+.layer-background-blur img {
+  filter: blur(50px);
+  transform: scale(1.15);
+  /* Overscale slightly to hide blurred edges */
+}
+
+.layer-background-sharp {
+  z-index: 0;
+}
+
+/* ─── z-1: Tracks ─── */
+.layer-tracks {
+  z-index: 1;
+  /* Position tracks flush to bottom of viewport —
+     they sit where the platform ground meets the foreground */
+  display: flex;
+  align-items: flex-end;
+}
+
+.layer-tracks img {
+  width: 120vw;
+  height: 20vw;
+  display: block;
+  margin-bottom: -15vw;
+  /* NO CSS transform — GSAP handles initial x position */
+  will-change: transform;
+}
+
+/* ─── z-2, z-3: Train layers ─── */
+.layer-train {
+  z-index: 2;
+  /* Position train so its base sits on the platform/tracks area.
+     The platform edge is at ~62% of the background, and the train
+     should sit with its wheels just above that line */
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 20vh;
+  /* push train up from the very bottom to sit on tracks */
+}
+
+.layer-train img {
+  height: 60vh;
+  width: auto;
+  display: block;
+  /* ALL transforms (scale, x) handled by GSAP for alignment */
+  will-change: transform, opacity;
+}
+
+/* ─── z-3 overlay: open door version ─── */
+.layer-train-open {
+  z-index: 3;
+}
+
+/* ─── z-4: Foreground Platform ─── */
+.layer-platform {
+  z-index: 4;
+  display: flex;
+  align-items: flex-end;
+}
+
+.layer-platform img {
+  width: 100vw;
+  height: 25vh;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+  margin-bottom: 0;
+}
+
+/* ─── z-5: Entry blackout overlay ─── */
+.layer-blackout {
+  z-index: 5;
+  background: #000;
+  /* NO CSS opacity — GSAP handles it */
+  will-change: opacity;
+}
+
+/* ─── Loading state ─── */
+.scene-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1.2rem;
+  z-index: 100;
+  letter-spacing: 0.05em;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.loading-spinner::before {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Debug Guide (Remove when done) --- */
+/* (Styles moved to index.css) */
+
+/* ─── On-Screen Instruction: Double Tap to Enter ─── */
+.enter-instruction {
+  position: fixed;
+  top: 2.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10001; /* above scene and guide overlay */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 26px;
+  background: rgba(14, 16, 22, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  color: #ffffff;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0.5s;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), 0 0 15px rgba(211, 47, 47, 0.2);
+}
+
+.enter-instruction.visible {
+  opacity: 1;
+  visibility: visible;
+  animation: instructionPulse 2.4s ease-in-out infinite;
+}
+
+.enter-instruction.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(-12px);
+  pointer-events: none;
+}
+
+.instruction-text {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.instruction-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.instruction-dot {
+  width: 8px;
+  height: 8px;
+  background: #d32f2f;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #d32f2f;
+}
+
+.instruction-ripple {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(211, 47, 47, 0.7);
+  animation: ripplePulse 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+@keyframes instructionPulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), 0 0 15px rgba(211, 47, 47, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.03);
+    box-shadow: 0 12px 38px rgba(0, 0, 0, 0.6), 0 0 25px rgba(211, 47, 47, 0.5);
+    border-color: rgba(211, 47, 47, 0.6);
+  }
+}
+
+@keyframes ripplePulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* ─── Tablet Optimizations (769px – 1024px) ─── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .layer-background img {
+    object-fit: cover;
+  }
+
+  .layer-tracks img {
+    width: 160vw;
+    margin-bottom: -18vw;
+  }
+
+  .layer-train {
+    padding-bottom: 18vh;
+  }
+
+  .layer-train img {
+    height: 48vh;
+  }
+
+  .layer-platform img {
+    width: 160vw;
+    height: 28vh;
+    object-fit: cover;
+    object-position: top;
+    margin-left: -30vw;
+  }
+}
+
+/* ─── Mobile Optimizations (≤ 768px) ─── */
+@media (max-width: 768px) {
+  .enter-instruction {
+    top: 1.2rem;
+    padding: 9px 16px;
+    gap: 9px;
+    max-width: 90vw;
+  }
+
+  .instruction-text {
+    font-size: clamp(0.72rem, 3.4vw, 0.88rem);
+  }
+
+  .instruction-badge {
+    width: 18px;
+    height: 18px;
+  }
+
+  .instruction-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .layer-background img {
+    object-fit: cover;
+    /* Fill the screen better on portrait */
+  }
+
+  .layer-tracks img {
+    width: 250vw;
+    height: auto;
+    margin-bottom: -25vw;
+  }
+
+  .layer-train {
+    padding-bottom: 16vh;
+  }
+
+  .layer-train img {
+    height: 55vh;
+  }
+
+  .layer-platform img {
+    width: 280vw;
+    height: 32vh;
+    object-fit: cover;
+    object-position: top;
+    margin-bottom: 0;
+    margin-left: -90vw;
+  }
+}
+
+/* ─── Extra Small Mobile (≤ 480px) ─── */
+@media (max-width: 480px) {
+  .enter-instruction {
+    top: 0.8rem;
+    padding: 7px 12px;
+    gap: 7px;
+    max-width: 94vw;
+  }
+
+  .instruction-text {
+    font-size: clamp(0.66rem, 3.2vw, 0.78rem);
+    letter-spacing: 0.02em;
+  }
+}

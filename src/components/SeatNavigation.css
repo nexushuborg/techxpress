@@ -1,0 +1,797 @@
+/* ─── CENTRAL CARTOON-STYLE HANGING INFORMATION BOARD ─── */
+
+.seat-navigation-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ── Central Board Anchor Wrapper ── */
+/* Perfectly centers the overhead board in the train aisle on ALL screen sizes */
+.central-board-anchor-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 120;
+}
+
+/* ── Central Hanging Board Container ── */
+.central-hanging-board-container {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: clamp(350px, 31vw, 490px);
+  max-width: calc(100vw - 24px);
+  margin-top: clamp(8px, 1.8vh, 22px);
+  transform-origin: 50% 0%;
+  will-change: transform;
+  z-index: 120;
+}
+
+/* Drop-Down Cartoon Elastic Animation */
+.central-hanging-board-container.dropped {
+  animation: cartoonDrop 0.65s cubic-bezier(0.34, 1.25, 0.64, 1) forwards;
+}
+
+.central-hanging-board-container.stowed {
+  transform: translateY(-130%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes cartoonDrop {
+  0% {
+    transform: translateY(-130%) scaleY(1.1);
+    opacity: 0;
+  }
+  65% {
+    transform: translateY(12px) scaleY(0.96);
+    opacity: 1;
+  }
+  82% {
+    transform: translateY(-5px) scaleY(1.02);
+  }
+  94% {
+    transform: translateY(2px) scaleY(0.99);
+  }
+  100% {
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* ── Cartoon Chains & Ceiling Mounts ── */
+.cartoon-suspension-system {
+  width: 78%;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  height: clamp(34px, 5.5vh, 58px);
+  margin-bottom: -8px;
+  z-index: 2;
+}
+
+.chain-anchor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.ceiling-bracket {
+  width: 28px;
+  height: 10px;
+  background: #474b54;
+  border: 3px solid #231d1d;
+  border-radius: 4px 4px 10px 10px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 3px 5px rgba(0, 0, 0, 0.4);
+}
+
+.cartoon-chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -3px;
+}
+
+.chain-link {
+  width: 14px;
+  height: 18px;
+  border: 3.5px solid #231d1d;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7e8799 0%, #4f5563 50%, #30343e 100%);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.6), 0 2px 4px rgba(0, 0, 0, 0.35);
+  margin-top: -6px;
+}
+
+.chain-link:nth-child(even) {
+  width: 10px;
+  background: linear-gradient(135deg, #636b7c 0%, #3d424e 100%);
+}
+
+.chain-hook {
+  width: 18px;
+  height: 18px;
+  border: 3.5px solid #231d1d;
+  border-radius: 50%;
+  background: radial-gradient(circle, #838d9e 20%, #3e4450 80%);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5), 0 2px 5px rgba(0, 0, 0, 0.5);
+  margin-top: -6px;
+}
+
+/* ── Cartoon Cardboard Board (Body) ── */
+.cartoon-cardboard-board {
+  width: 100%;
+  position: relative;
+  background: 
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.3) 0%, transparent 60%),
+    radial-gradient(circle at 15% 85%, rgba(0, 0, 0, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #fbe6ba 0%, #eec78d 45%, #dda864 100%);
+  border: 4px solid #2a1f1d;
+  border-radius: 18px;
+  padding: 12px 14px 10px 14px;
+  box-sizing: border-box;
+  box-shadow: 
+    0 14px 0px rgba(35, 25, 22, 0.45),
+    0 22px 30px rgba(0, 0, 0, 0.55),
+    inset 0 4px 0 rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  /* Subtle cartoon idle sway after entrance */
+  animation: cartoonIdleSway 4.5s ease-in-out infinite alternate;
+  transform-origin: 50% -30px;
+}
+
+@keyframes cartoonIdleSway {
+  0% {
+    transform: rotate(-0.5deg) translateY(0);
+  }
+  100% {
+    transform: rotate(0.5deg) translateY(3px);
+  }
+}
+
+/* Board Mount Rings */
+.board-mount-loops {
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  pointer-events: none;
+}
+
+.mount-loop {
+  width: 20px;
+  height: 12px;
+  background: #3e4450;
+  border: 3.5px solid #231d1d;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.loop-left { margin-left: 20px; }
+.loop-right { margin-right: 20px; }
+
+/* ── Cartoon Header Banner ── */
+.board-header-banner {
+  background: linear-gradient(180deg, #243c7d 0%, #172856 100%);
+  border: 3px solid #231d1d;
+  border-radius: 12px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 0 #1b1615, 0 6px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.train-cartoon-icon {
+  font-size: clamp(1rem, 1.4vw, 1.4rem);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.4));
+}
+
+.banner-title {
+  font-family: 'Bebas Neue', 'Inter', sans-serif;
+  font-size: clamp(1rem, 1.5vw, 1.35rem);
+  letter-spacing: 0.1em;
+  color: #ffeb3b;
+  text-shadow: 0 2px 0 #111a33;
+}
+
+.banner-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.5rem, 0.7vw, 0.62rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── 3 Prominent Options List ── */
+.board-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cartoon-option-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  cursor: pointer;
+  background: #fffefb;
+  border: 3px solid #2a1f1d;
+  border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 5px 0 #2a1f1d, 0 7px 11px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
+  user-select: none;
+}
+
+.cartoon-option-card:hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: 0 8px 0 #2a1f1d, 0 12px 18px rgba(0, 0, 0, 0.35);
+  background: #ffffff;
+}
+
+.cartoon-option-card:active {
+  transform: translateY(2px) scale(0.99);
+  box-shadow: 0 3px 0 #2a1f1d, 0 4px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Specific Card Tint Borders on Hover */
+.card-about:hover { border-color: #1f3471; }
+.card-register:hover { border-color: #c62828; }
+.card-timeline:hover { border-color: #2e7d32; }
+
+/* ── Option Icon Badge ── */
+.option-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 2.8px solid #2a1f1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6), 0 3px 0 #2a1f1d;
+  flex-shrink: 0;
+}
+
+.icon-about {
+  background: linear-gradient(135deg, #64b5f6 0%, #1976d2 100%);
+  color: #ffffff;
+}
+
+.icon-register {
+  background: linear-gradient(135deg, #ff8a80 0%, #d32f2f 100%);
+  color: #ffffff;
+}
+
+.icon-timeline {
+  background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+  color: #ffffff;
+}
+
+/* ── Option Text ── */
+.option-text-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 10px;
+  flex: 1;
+}
+
+.option-title {
+  font-family: 'Bebas Neue', 'Inter', sans-serif;
+  font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.card-about .option-title { color: #1a2f63; }
+.card-register .option-title { color: #ba1a1a; }
+.card-timeline .option-title { color: #1b5e20; }
+
+.option-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.5rem, 0.7vw, 0.62rem);
+  font-weight: 700;
+  color: #634b35;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ── Cartoon Action Button Pills ── */
+.option-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 2.2px solid #2a1f1d;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.6rem, 0.8vw, 0.72rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  box-shadow: 0 3px 0 #2a1f1d;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.btn-about {
+  background: #ffca28;
+  color: #211c13;
+}
+
+.btn-register {
+  background: #ef5350;
+  color: #ffffff;
+}
+
+.btn-timeline {
+  background: #4caf50;
+  color: #ffffff;
+}
+
+.cartoon-option-card:hover .option-action-btn {
+  transform: translateX(3px);
+}
+
+.btn-arrow {
+  display: inline-block;
+  font-size: 0.75em;
+  transition: transform 0.2s ease;
+}
+
+.cartoon-option-card:hover .btn-arrow {
+  transform: translateX(2px);
+}
+
+/* ── Bottom Cardboard Trim ── */
+.board-bottom-trim {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+  user-select: none;
+}
+
+.corner-stitch {
+  width: 12px;
+  height: 3px;
+  background: #6d5036;
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+.bottom-tag-text {
+  font-family: 'Inter', monospace;
+  font-size: clamp(0.46rem, 0.65vw, 0.56rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #684f37;
+  text-transform: uppercase;
+}
+
+/* ── Physical 3D Cartoon Unfolding Transition Curtain ── */
+.cartoon-unfolding-transition-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+  pointer-events: all;
+  background: rgba(10, 14, 20, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: curtainFadeIn 0.28s ease forwards;
+}
+
+@keyframes curtainFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.curtain-cardboard-sheet {
+  width: min(88vw, 620px);
+  min-height: 280px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: 
+    radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.35) 0%, transparent 60%),
+    linear-gradient(180deg, #fbe6ba 0%, #ecd09e 50%, #dcad6d 100%);
+  border: 4.5px solid #2a1f1d;
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 0px rgba(35, 25, 22, 0.5),
+    0 35px 50px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  padding: clamp(16px, 3.5vw, 24px);
+  box-sizing: border-box;
+  transform-origin: 50% 0%;
+  animation: physicalUnfoldExpand 0.42s cubic-bezier(0.34, 1.25, 0.64, 1) forwards;
+}
+
+@keyframes physicalUnfoldExpand {
+  0% {
+    transform: scale(0.5) rotateX(25deg) translateY(-50px);
+    opacity: 0;
+  }
+  65% {
+    transform: scale(1.02) rotateX(-4deg) translateY(6px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotateX(0deg) translateY(0);
+    opacity: 1;
+  }
+}
+
+.curtain-header-tab {
+  background: linear-gradient(180deg, #243c7d 0%, #172856 100%);
+  border: 3px solid #2a1f1d;
+  border-radius: 12px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 0 #151110;
+}
+
+.curtain-tab-title {
+  font-family: 'Bebas Neue', 'Inter', sans-serif;
+  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  letter-spacing: 0.1em;
+  color: #ffeb3b;
+  text-shadow: 0 2px 0 #101930;
+}
+
+.curtain-stitch {
+  width: 14px;
+  height: 4px;
+  background: #ffeb3b;
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+.curtain-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 25px;
+}
+
+.curtain-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #2a1f1d;
+  border-top-color: #8c281e;
+  border-radius: 50%;
+  animation: curtainSpin 0.7s linear infinite;
+}
+
+@keyframes curtainSpin {
+  to { transform: rotate(360deg); }
+}
+
+.curtain-loading-text {
+  font-family: 'Inter', monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: #4a3424;
+}
+
+/* Selected Card Interactive Animation on Click */
+.cartoon-option-card.selected-transition {
+  transform: scale(1.03) translateZ(10px);
+  box-shadow: 0 8px 0 #2a1f1d, 0 14px 20px rgba(0, 0, 0, 0.45);
+  animation: cardPulseClick 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes cardPulseClick {
+  from { filter: brightness(1.05); }
+  to { filter: brightness(1.2); }
+}
+
+.central-hanging-board-container.board-transitioning {
+  animation: boardDipping 0.35s ease-in-out forwards;
+}
+
+@keyframes boardDipping {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(6px) rotate(-0.5deg); }
+  100% { transform: translateY(3px) rotate(0.2deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE MEDIA QUERIES (100% Mobile, Tablet & Desktop Ready)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Tablet / Medium Screens (≤ 900px) ── */
+@media (max-width: 900px) {
+  .central-hanging-board-container {
+    width: clamp(340px, 50vw, 440px);
+    margin-top: 1.2vh;
+  }
+  .cartoon-suspension-system {
+    height: 42px;
+    margin-bottom: -7px;
+  }
+}
+
+/* ── Mobile Screens (≤ 600px) ── */
+@media (max-width: 600px) {
+  .central-hanging-board-container {
+    width: min(92vw, 365px);
+    margin-top: 8px;
+  }
+
+  .cartoon-suspension-system {
+    width: 82%;
+    height: 30px;
+    margin-bottom: -5px;
+  }
+
+  .ceiling-bracket {
+    width: 22px;
+    height: 8px;
+    border-width: 2px;
+  }
+
+  .chain-link {
+    width: 11px;
+    height: 14px;
+    border-width: 2.5px;
+    margin-top: -4px;
+  }
+
+  .chain-link:nth-child(even) {
+    width: 8px;
+  }
+
+  .chain-hook {
+    width: 14px;
+    height: 14px;
+    border-width: 2.5px;
+    margin-top: -4px;
+  }
+
+  .cartoon-cardboard-board {
+    border-width: 3.5px;
+    border-radius: 16px;
+    padding: 9px 10px 7px 10px;
+    gap: 7px;
+    box-shadow: 
+      0 10px 0px rgba(35, 25, 22, 0.45),
+      0 16px 22px rgba(0, 0, 0, 0.55),
+      inset 0 3px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .board-mount-loops {
+    top: -8px;
+  }
+
+  .mount-loop {
+    width: 16px;
+    height: 10px;
+    border-width: 2.5px;
+  }
+
+  .board-header-banner {
+    padding: 5px 8px;
+    border-width: 2px;
+    border-radius: 9px;
+  }
+
+  .train-cartoon-icon {
+    font-size: 1.1rem;
+  }
+
+  .banner-title {
+    font-size: clamp(0.95rem, 4.2vw, 1.15rem);
+    letter-spacing: 0.08em;
+  }
+
+  .banner-sub {
+    font-size: 0.52rem;
+    padding: 1px 4px;
+  }
+
+  .board-options-list {
+    gap: 6px;
+  }
+
+  .cartoon-option-card {
+    border-width: 2.5px;
+    border-radius: 12px;
+    padding: 6px 9px;
+    gap: 8px;
+    box-shadow: 0 4px 0 #2a1f1d, 0 6px 10px rgba(0, 0, 0, 0.25);
+  }
+
+  .option-icon-box {
+    width: 34px;
+    height: 34px;
+    border-width: 2.5px;
+    border-radius: 8px;
+  }
+
+  .option-icon-box svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .option-text-box {
+    margin-left: 6px;
+  }
+
+  .option-title {
+    font-size: clamp(1.1rem, 4.4vw, 1.3rem);
+  }
+
+  .option-sub {
+    font-size: 0.5rem;
+    margin-top: 1px;
+  }
+
+  .option-action-btn {
+    padding: 4px 8px;
+    font-size: 0.62rem;
+    border-width: 2px;
+    border-radius: 14px;
+    gap: 3px;
+  }
+
+  .bottom-tag-text {
+    font-size: 0.5rem;
+    letter-spacing: 0.08em;
+  }
+
+  .curtain-cardboard-sheet {
+    width: 92vw;
+    min-height: 250px;
+    padding: 16px;
+    border-width: 3.5px;
+  }
+
+  .curtain-tab-title {
+    font-size: 1.05rem;
+  }
+}
+
+/* ── Extra Small Phones (≤ 360px) ── */
+@media (max-width: 360px) {
+  .central-hanging-board-container {
+    width: 95vw;
+    margin-top: 4px;
+  }
+
+  .cartoon-suspension-system {
+    height: 24px;
+  }
+
+  .option-icon-box {
+    width: 30px;
+    height: 30px;
+  }
+
+  .option-title {
+    font-size: 1rem;
+  }
+
+  .option-action-btn {
+    padding: 3px 6px;
+    font-size: 0.56rem;
+  }
+}
+
+/* ── Landscape / Short Viewport Screens (≤ 520px height) ── */
+@media (max-height: 520px) {
+  .central-hanging-board-container {
+    width: clamp(290px, 42vw, 360px);
+    margin-top: 2px;
+  }
+
+  .cartoon-suspension-system {
+    height: 18px;
+    margin-bottom: -3px;
+  }
+
+  .ceiling-bracket {
+    height: 6px;
+  }
+
+  .chain-link {
+    height: 10px;
+    width: 8px;
+  }
+
+  .cartoon-cardboard-board {
+    padding: 5px 8px 4px 8px;
+    gap: 4px;
+    border-radius: 12px;
+  }
+
+  .board-header-banner {
+    padding: 3px 6px;
+  }
+
+  .banner-title {
+    font-size: 0.95rem;
+  }
+
+  .banner-sub {
+    font-size: 0.48rem;
+  }
+
+  .board-options-list {
+    gap: 4px;
+  }
+
+  .cartoon-option-card {
+    padding: 4px 6px;
+    border-radius: 8px;
+    gap: 6px;
+  }
+
+  .option-icon-box {
+    width: 26px;
+    height: 26px;
+  }
+
+  .option-icon-box svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .option-title {
+    font-size: 0.95rem;
+  }
+
+  .option-sub {
+    display: none;
+  }
+
+  .option-action-btn {
+    padding: 2px 5px;
+    font-size: 0.55rem;
+  }
+
+  .board-bottom-trim {
+    display: none;
+  }
+}
