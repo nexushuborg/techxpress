@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LABELS, PNR, UI } from '../../content/station.js';
 import { checkPnr } from '../../lib/station.js';
+import { goToRegister, REGISTER_URL } from '../portal.js';
 import { canShareFiles, downloadTicket, shareTicket } from '../../lib/eticket.js';
 import { normalizeRegistrationNo } from '../../utils/registrationNo.js';
 
@@ -58,7 +59,7 @@ function TicketActions({ ticket }) {
 }
 
 // PNR enquiry counter: registration number + email -> a rubber stamp.
-export default function PnrStatus({ titleId, prefill, onOpen }) {
+export default function PnrStatus({ titleId, prefill }) {
   const [form, setForm] = useState(() => ({
     registrationNo: prefill?.registrationNo ?? '',
     email: prefill?.email ?? '',
@@ -164,7 +165,7 @@ export default function PnrStatus({ titleId, prefill, onOpen }) {
               <strong>{PNR.stamps[result.status].label}.</strong> {PNR.stamps[result.status].text}
             </p>
             {result.status === 'NO_RESERVATION' && (
-              <a className="txp-btn txp-btn--pink" href="#book" onClick={(e) => { e.preventDefault(); onOpen('book'); }}>
+              <a className="txp-btn txp-btn--pink" href={REGISTER_URL} onClick={goToRegister}>
                 {LABELS.book.english}
               </a>
             )}

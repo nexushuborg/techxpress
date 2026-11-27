@@ -9,13 +9,13 @@ import { LoginPage } from './pages/public/LoginPage.jsx';
 import { RegistrationPage } from './pages/public/RegistrationPage.jsx';
 // import { LeaderboardPage }     from './pages/public/LeaderboardPage.jsx';
 // import { AwardsPage }          from './pages/public/AwardsPage.jsx';
-// import { ProblemStatementsPage } from './pages/public/ProblemStatementsPage.jsx';
+import { ProblemStatementsPage } from './pages/public/ProblemStatementsPage.jsx';
 
 import { DashboardPage } from './pages/student/DashboardPage.jsx';
 import { TeamFormationPage } from './pages/student/TeamFormationPage.jsx';
 
 // import { JuryDashboardPage }   from './pages/jury/JuryDashboardPage.jsx';
-// import { DirectoryPage }       from './pages/shared/DirectoryPage.jsx';
+import { DirectoryPage } from './pages/shared/DirectoryPage.jsx';
 
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage.jsx';
 import { AdminVerificationPage } from './pages/admin/AdminVerificationPage.jsx';
@@ -49,6 +49,7 @@ export const App = () => (
 
       <Route path="/dashboard" element={<RequireAuth role="STUDENT"><DashboardPage /></RequireAuth>} />
       <Route path="/teams" element={<RequireAuth role="STUDENT"><TeamFormationPage /></RequireAuth>} />
+      <Route path="/problemstatement" element={<ProblemStatementsPage />} />
       {/*
       <Route path="/jury"      element={<RequireAuth role="JURY"><JuryDashboardPage /></RequireAuth>} />
       <Route path="/directory" element={<RequireAuth><DirectoryPage /></RequireAuth>} />
@@ -61,6 +62,7 @@ export const App = () => (
       <Route path="/admin/registry" element={<AdminRegistryPage />} />
       <Route path="/admin/staff" element={<AdminStaffPage />} />
       <Route path="/admin/teams" element={<AdminTeamsPage />} />
+      <Route path="/admin/directory" element={<DirectoryPage />} />
       <Route path="/admin/rules" element={<AdminRulesPage />} />
       <Route path="/admin/rounds" element={<AdminRoundsPage />} />
       <Route path="/admin/taxonomy" element={<AdminTaxonomyPage />} />

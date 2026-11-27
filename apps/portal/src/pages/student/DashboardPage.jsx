@@ -20,8 +20,6 @@ import { CardSkeleton } from '../../components/ui/Skeleton.jsx';
 import { Spinner } from '../../components/ui/Spinner.jsx';
 import { Modal } from '../../components/ui/Modal.jsx';
 import { formatRelative, titleCase } from '../../utils/format.js';
-import { DomainPicker, DOMAINS_SAVED_EVENT } from '../../components/student/DomainPicker.jsx';
-import { TshirtSizePicker } from '../../components/student/TshirtSizePicker.jsx';
 
 // Role → badge tone mapping
 const ROLE_TONE = { ADMIN: 'crit', JURY: 'cyan', COORDINATOR: 'warn', STUDENT: 'live' };
@@ -83,9 +81,7 @@ const ProfileLinks = ({ user }) => {
 
 // ── Profile tab ───────────────────────────────────────────────────────────
 
-const ProfileTab = ({ user, myTeam }) => {
-  const [editDomains, setEditDomains] = useState(false);
-  return (
+const ProfileTab = ({ user, myTeam }) => (
     <div className="grid gap-6 md:grid-cols-3">
       {/* Main profile card */}
       <section className="md:col-span-2 bg-[#fffaf0] border-2 border-[#151320] shadow-[0_3px_0_#151320] p-6">
@@ -109,16 +105,7 @@ const ProfileTab = ({ user, myTeam }) => {
           {user.branch ? <Field icon={GraduationCap} label="Branch" value={user.branch} /> : null}
           <Field icon={BookOpen} label="Year / Semester" value={user.yearSemester ?? '—'} />
           <Field icon={Mail} label="Phone" value={user.phone ?? '—'} />
-          {user.role === 'STUDENT' ? (
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.2em] text-[#4a4458]">
-                <Shirt size={11} /> T-shirt size
-              </div>
-              <TshirtSizePicker key={user.tshirtSize ?? ''} current={user.tshirtSize ?? ''} compact />
-            </div>
-          ) : (
-            <Field icon={Shirt} label="T-shirt size" value={user.tshirtSize ?? '—'} />
-          )}
+          <Field icon={Shirt} label="T-shirt size" value={user.tshirtSize ?? '—'} />
           <Field icon={Briefcase} label="Preferred Team Role" value={user.preferredTeamRole ?? '—'} />
           <Field icon={Award} label="Contribution Areas" value={joinList(user.contributionAreas)} />
         </dl>
@@ -127,19 +114,8 @@ const ProfileTab = ({ user, myTeam }) => {
 
         {user.role === 'STUDENT' || user.preferredDomainDetails?.length ? (
           <div className="mt-7 border-t-2 border-[#151320]/15 pt-5">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.22em] text-[#4a4458]">
-                Preferred domains
-              </div>
-              {user.role === 'STUDENT' && (
-                <button
-                  type="button"
-                  className="ghost-button"
-                  onClick={() => setEditDomains(true)}
-                >
-                  Edit domains
-                </button>
-              )}
+            <div className="mb-3 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.22em] text-[#4a4458]">
+              Preferred domains
             </div>
             <div className="flex flex-wrap gap-1.5">
               {user.preferredDomainDetails?.length
@@ -150,11 +126,6 @@ const ProfileTab = ({ user, myTeam }) => {
                   <span className="font-mono text-[12px] text-[#b45309]">No domains chosen yet.</span>
                 )}
             </div>
-            <DomainPicker
-              open={editDomains}
-              onClose={() => setEditDomains(false)}
-              initial={user.preferredDomains ?? []}
-            />
           </div>
         ) : null}
 
@@ -227,7 +198,6 @@ const ProfileTab = ({ user, myTeam }) => {
       </aside>
     </div>
   );
-};
 
 // ── Inbox tab ─────────────────────────────────────────────────────────────
 
@@ -954,11 +924,6 @@ export const DashboardPage = () => {
   const { refetch: refetchMe } = me;
   const { refetch: refetchTeam } = myTeam;
   const u = me.data?.user ?? user;
-
-  useEffect(() => {
-    window.addEventListener(DOMAINS_SAVED_EVENT, refetchMe);
-    return () => window.removeEventListener(DOMAINS_SAVED_EVENT, refetchMe);
-  }, [refetchMe]);
 
   const handleTeamChanged = useCallback(() => {
     refetchTeam();

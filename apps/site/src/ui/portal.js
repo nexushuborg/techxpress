@@ -3,6 +3,7 @@
 // (DoorTransition listens for this event); modified clicks behave normally.
 export const PORTAL_URL = '/login';
 export const REGISTER_URL = '/register';
+export const PROBLEMS_URL = '/problemstatement';
 export const PORTAL_EVENT = 'txp:portal';
 
 export function goToPortal(event, url = PORTAL_URL) {
@@ -13,4 +14,8 @@ export function goToPortal(event, url = PORTAL_URL) {
 
 export function goToRegister(event) {
   return goToPortal(event, REGISTER_URL);
+}
+
+export function goToProblems(event) {
+  return goToPortal(event, PROBLEMS_URL);
 }

@@ -1,10 +1,11 @@
 import { EVENT, LABELS, LED } from '../../content/station.js';
 import { countdownParts, countdownSpoken, timeLeft } from '../../lib/countdown.js';
 import { useLedStatus, useNow } from '../hooks.js';
+import { goToRegister, REGISTER_URL } from '../portal.js';
 import { formatJourneyDate } from '../../lib/eticket.js';
 
 // The orange dot-matrix departure board, enlarged.
-export default function Countdown({ titleId, onOpen }) {
+export default function Countdown({ titleId }) {
   const now = useNow(15000);
   const statusKey = useLedStatus();
   const left = timeLeft(now, EVENT.startsAt);
@@ -50,7 +51,7 @@ export default function Countdown({ titleId, onOpen }) {
           {LABELS.countdown.hint}: {departed ? status : countdownSpoken(left)}.
         </p>
         {statusKey === 'open' && (
-          <a className="txp-btn txp-btn--pink" href="#book" onClick={(e) => { e.preventDefault(); onOpen('book'); }}>
+          <a className="txp-btn txp-btn--pink" href={REGISTER_URL} onClick={goToRegister}>
             {LABELS.book.english}
           </a>
         )}

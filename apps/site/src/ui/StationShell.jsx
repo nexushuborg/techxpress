@@ -1,9 +1,10 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Station from '../scene/Station.jsx';
 import { BOOT_MIN_MS, INTRO_TOTAL_MS } from '../scene/stage.js';
 import { LED, UI } from '../content/station.js';
 import { applyMotionPref, readMotionOff } from '../lib/station.js';
 import { useLedStatus, usePanelRoute, usePresence } from './hooks.js';
+import { goToRegister, REGISTER_URL } from './portal.js';
 import Panel from './Panel.jsx';
 import Menu from './Menu.jsx';
 import BookButton from './BookButton.jsx';
@@ -19,9 +20,6 @@ import PnrStatus from './panels/PnrStatus.jsx';
 import '../styles/ui.css';
 import logoUrl from '../assets/stage/logo.webp';
 import soaLogoUrl from '../assets/stage/sun.webp';
-
-const loadCounter = () => import('./panels/ReservationCounter.jsx');
-const ReservationCounter = lazy(loadCounter);
 
 // Apply the saved motion preference before the stage first renders.
 applyMotionPref(readMotionOff());
@@ -57,7 +55,6 @@ export default function StationShell() {
   const [introDone, setIntroDone] = useState(() => Boolean(panel));
   const [pnrPrefill, setPnrPrefill] = useState(null);
   const [opener, setOpener] = useState(null);
-  const dirtyRef = useRef(false);
 
   // Fallback in case the stage never calls onIntroDone.
   useEffect(() => {
@@ -68,17 +65,20 @@ export default function StationShell() {
 
   const onIntroDone = useCallback(() => setIntroDone(true), []);
 
-  // Fetch the booking counter's chunk once the browser is idle.
+  // Redirect /#book straight to the standalone /register page.
   useEffect(() => {
-    const idle = window.requestIdleCallback ?? ((cb) => setTimeout(cb, 2000));
-    const cancel = window.cancelIdleCallback ?? clearTimeout;
-    const id = idle(() => loadCounter().catch(() => {}), { timeout: 6000 });
-    return () => cancel(id);
-  }, []);
+    if (panel === 'book') {
+      window.location.replace(REGISTER_URL);
+    }
+  }, [panel]);
 
   // open(name, pnrPrefill?, opener?)
   const openPanel = useCallback(
     (name, prefill = null, openerEl = null) => {
+      if (name === 'book') {
+        goToRegister();
+        return;
+      }
       if (!panel) setOpener(openerEl ?? document.activeElement);
       if (name === 'pnr') setPnrPrefill(prefill);
       setIntroDone(true);
@@ -87,12 +87,9 @@ export default function StationShell() {
     [open, panel],
   );
 
-  const onDirtyChange = useCallback((dirty) => {
-    dirtyRef.current = dirty;
-  }, []);
-  const shouldConfirm = useCallback(() => shown === 'book' && dirtyRef.current, [shown]);
+  const shouldConfirm = useCallback(() => false, []);
 
-  const panelOpen = Boolean(panel);
+  const panelOpen = Boolean(panel) && panel !== 'book';
   const titleId = shown ? `panel-title-${shown}` : undefined;
   const View = shown ? PANEL_VIEWS[shown] : null;
 
@@ -119,7 +116,7 @@ export default function StationShell() {
         </div>
       )}
 
-      {shown && (
+      {shown && shown !== 'book' && (
         <Panel
           key={shown}
           name={shown}
@@ -129,11 +126,7 @@ export default function StationShell() {
           shouldConfirm={shouldConfirm}
           returnFocus={opener}
         >
-          {shown === 'book' ? (
-            <Suspense fallback={<p className="panel-loading" id={titleId} tabIndex={-1}>{UI.loadingCounter}</p>}>
-              <ReservationCounter titleId={titleId} onOpen={openPanel} onDirtyChange={onDirtyChange} />
-            </Suspense>
-          ) : shown === 'pnr' ? (
+          {shown === 'pnr' ? (
             <PnrStatus titleId={titleId} prefill={pnrPrefill} onOpen={openPanel} />
           ) : (
             <View titleId={titleId} onOpen={openPanel} />

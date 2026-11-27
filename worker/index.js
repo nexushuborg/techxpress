@@ -15,6 +15,7 @@ const PORTAL_ROUTES = new Set([
   '/register',
   '/dashboard',
   '/teams',
+  '/problemstatement',
   '/admin',
 ]);
 

@@ -76,9 +76,9 @@ export const TopAppBar = () => {
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-2 md:flex">
           <TechXpressLink />
+          <NavItem to="/problemstatement">Problem Statements</NavItem>
           {/*
           <NavItem to="/leaderboard">Leaderboard</NavItem>
-          <NavItem to="/problem-statements">Problems</NavItem>
           <NavItem to="/awards">Awards</NavItem>
           */}
 
@@ -125,9 +125,9 @@ export const TopAppBar = () => {
       )}>
         <nav className="flex flex-col gap-3 p-6">
           <TechXpressLink />
+          <NavItem to="/problemstatement" onClick={closeMenu}>Problem Statements</NavItem>
           {/*
           <NavItem to="/leaderboard" onClick={closeMenu}>Leaderboard</NavItem>
-          <NavItem to="/problem-statements" onClick={closeMenu}>Problems</NavItem>
           <NavItem to="/awards" onClick={closeMenu}>Awards</NavItem>
           */}
 

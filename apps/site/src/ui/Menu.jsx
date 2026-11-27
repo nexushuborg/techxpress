@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { BOOK, HINTS, LABELS, UI } from '../content/station.js';
 import { readMotionOff, setMotionOff } from '../lib/station.js';
-import { goToPortal, goToRegister, PORTAL_URL, REGISTER_URL } from './portal.js';
+import { goToPortal, goToProblems, goToRegister, PORTAL_URL, PROBLEMS_URL, REGISTER_URL } from './portal.js';
 
 const ITEMS = ['about', 'timetable', 'prizes', 'faq', 'pnr', 'countdown'];
 
@@ -84,6 +84,12 @@ export default function Menu({ onOpen }) {
               </a>
             </li>
           ))}
+          <li>
+            <a href={PROBLEMS_URL} onClick={goToProblems} className="guide-item">
+              <span className="guide-item-en">Problem Statements</span>
+              <span className="guide-item-hi" lang="hi">समस्या कथन</span>
+            </a>
+          </li>
           <li>
             <a href={REGISTER_URL} onClick={goToRegister} className="guide-item guide-item--book">
               <span className="guide-item-en">{LABELS.book.english}</span>

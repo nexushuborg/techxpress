@@ -6,7 +6,6 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<StationShell />} />
-      <Route path="/register" element={<Navigate to="/#book" replace />} />
       <Route path="/about" element={<Navigate to="/#about" replace />} />
       <Route path="/timeline" element={<Navigate to="/#timetable" replace />} />
       <Route path="/ask" element={<Navigate to="/#faq" replace />} />

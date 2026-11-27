@@ -31,7 +31,7 @@ export const LED = {
   // Once it passes, `closedLabel` shows under the headline.
   countdownTo: '2026-11-27T23:59:59+05:30',
   countdownLabel: 'REGISTRATION CLOSES IN',
-  closedLabel: 'REGISTRATION CLOSED · PLATFORM 1',
+  closedLabel: 'REGISTER SOON',
   status: {
     beforeOpen: 'REGISTRATION CLOSES 27 NOV · PLATFORM 1',
     open: 'BOARDING NOW · BOOK YOUR TICKET · PLATFORM 1',

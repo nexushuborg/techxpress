@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom';
 import {
   Infinity as InfinityIcon, Users, ShieldCheck, Settings, Lock, Megaphone,
-  History, Layers, ListChecks, LogOut, Menu, FlaskConical, Database, /* IdCard, */ KeyRound
+  History, Layers, ListChecks, LogOut, Menu, FlaskConical, Database, IdCard, KeyRound
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import { cn } from '../../utils/cn.js';
@@ -14,7 +14,7 @@ const ALL_NAV = [
   { to: '/admin/registry',                  label: 'Registry',     icon: Database  },
   { to: '/admin/staff',                     label: 'Staff',        icon: KeyRound  },
   { to: '/admin/teams',                     label: 'Teams',        icon: Users     },
-  // { to: '/directory',                       label: 'Directory',    icon: IdCard    },
+  { to: '/admin/directory',                 label: 'Directory',    icon: IdCard    },
   { to: '/admin/rules',                     label: 'Rules',        icon: Settings  },
   { to: '/admin/rounds',                    label: 'Rounds',       icon: Lock      },
   { to: '/admin/taxonomy',                  label: 'Taxonomy',     icon: ListChecks },
