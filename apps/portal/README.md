@@ -1,13 +1,13 @@
 # VORTEX portal (frontend)
 
-A React 19 + Vite + Tailwind single-page app, served under **`/vortex`** on the TechXpress domain by the shared Cloudflare Worker (see the [root README](../../README.md) and [docs/DEPLOY.md](../../docs/DEPLOY.md)).
+A React 19 + Vite + Tailwind single-page app, served at root paths (`/login`, `/dashboard`, `/teams`, `/admin`, …) on the TechXpress domain by the shared Cloudflare Worker (see the [root README](../../README.md) and [docs/DEPLOY.md](../../docs/DEPLOY.md)).
 
 ## Run
 
 ```bash
 npm install
-npm run dev        # http://localhost:5174/vortex/, proxies /api and /socket.io to http://127.0.0.1:3001
-npm run build      # production bundle in dist/ (the root build copies it to dist/vortex/)
+npm run dev        # http://localhost:5174/, proxies /api and /socket.io to http://127.0.0.1:3001
+npm run build      # production bundle in dist/ (the root build puts the shell in dist/_app/ and assets in dist/app-assets/)
 npm run lint
 ```
 
@@ -22,16 +22,15 @@ Both are baked in at **build time**. After changing one in Cloudflare, trigger a
 
 ## Base path
 
-`vite.config.js` sets `base: '/vortex/'` and `main.jsx` uses `<BrowserRouter basename="/vortex">`, so routes and `<Link>`s are written without the prefix (`/teams`, not `/vortex/teams`). Links **out** of the portal (the "← TechXpress" link to the train site) must be plain `<a href>` tags, because the router would add the prefix.
+`vite.config.js` sets `base: '/'` with `build.assetsDir: 'app-assets'`, and `main.jsx` uses `<BrowserRouter>` with no basename. Links back to the train site (`← TechXpress`) must still be plain `<a href="/">` tags, because `/` is served by `apps/site` rather than this SPA.
 
 ## Routes
 
-Paths below are relative to `/vortex`.
+`/` and any unmatched route redirect to `/login`.
 
 | Path | Who | Page |
 |---|---|---|
-| `/` | everyone | Home |
-| `/register`, `/login` | logged-out users | Registration (per-field validation), Login |
+| `/login`, `/register` | logged-out users | Login, Registration (per-field validation) |
 | `/leaderboard`, `/awards`, `/problem-statements` | everyone | Live leaderboard, awards, problem statements grouped by theme |
 | `/directory` | any logged-in user | Verified-student directory |
 | `/dashboard` | student | Profile, Explore (members/teams), Inbox, Broadcasts |

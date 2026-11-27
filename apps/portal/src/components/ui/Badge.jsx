@@ -1,33 +1,35 @@
 import { cn } from '../../utils/cn.js';
 
-// Tonal pill for statuses. Each tone is a distinct signal color.
+// Tonal pill for statuses — station paper-theatre aesthetic.
+// Each tone maps to an ink/paper/status colour on the parchment surface.
 // Use `dot` to render a small leading status dot.
 
 const TONE = {
-  cyan: 'border-accent-cyan/40 text-accent-cyan bg-accent-cyan-soft',
-  live: 'border-status-live/40 text-status-live bg-status-live/10',
-  warn: 'border-status-warn/40 text-status-warn bg-status-warn/10',
-  crit: 'border-status-crit/40 text-status-crit bg-status-crit/10',
-  dim:  'border-border-mid text-text-secondary bg-bg-surface-2',
+  cyan: 'border-[#c8235f]/50 text-[#c8235f] bg-[#fce7ef]',          // pink = primary signal
+  live: 'border-[#0b6e43]/40 text-[#0b6e43] bg-[#e6f4ee]',         // green = live / good
+  warn: 'border-[#b45309]/40 text-[#b45309] bg-[#fef3e2]',         // amber = warning
+  crit: 'border-[#b8102a]/40 text-[#b8102a] bg-[#fde8ea]',         // red = critical
+  dim:  'border-[#151320]/30 text-[#4a4458] bg-[#f3e9d2]',         // parchment dim
 };
 
 const DOT = {
-  cyan: 'bg-accent-cyan',
-  live: 'bg-status-live',
-  warn: 'bg-status-warn',
-  crit: 'bg-status-crit',
-  dim:  'bg-text-dim',
+  cyan: 'bg-[#c8235f]',
+  live: 'bg-[#0b6e43]',
+  warn: 'bg-[#b45309]',
+  crit: 'bg-[#b8102a]',
+  dim:  'bg-[#4a4458]',
 };
 
 export const Badge = ({ tone = 'dim', dot, children, className }) => (
   <span
     className={cn(
-      'inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em]',
+      "inline-flex items-center gap-1.5 border-2 px-2 py-0.5",
+      "font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.16em]",
       TONE[tone],
       className,
     )}
   >
-    {dot && <span className={cn('h-1.5 w-1.5 rounded-full animate-pulse-soft', DOT[tone])} />}
+    {dot && <span className={cn('h-1.5 w-1.5 rounded-full animate-pulse', DOT[tone])} />}
     {children}
   </span>
 );

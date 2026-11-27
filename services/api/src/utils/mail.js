@@ -1,3 +1,4 @@
+import net from 'node:net';
 import { env, isProd } from '../config/env.js';
 import { logger } from './logger.js';
 import { COMMUNITY_LINKS } from '../config/community.js';
@@ -29,8 +30,11 @@ const parseAddress = (value) => {
 
 const FROM = env.MAIL_FROM ? parseAddress(env.MAIL_FROM) : null;
 const REPLY_TO = env.MAIL_REPLY_TO;
-const enabled = Boolean(FROM && env.CF_ACCOUNT_ID && env.CF_EMAIL_API_TOKEN);
-const SEND_URL = enabled
+const cfEnabled = Boolean(FROM && env.CF_ACCOUNT_ID && env.CF_EMAIL_API_TOKEN);
+const smtpEnabled = Boolean(!isProd && !cfEnabled && env.SMTP_HOST);
+const effectiveFrom = FROM ?? (smtpEnabled ? { address: 'noreply@localhost', name: 'TechXpress Dev' } : null);
+const enabled = cfEnabled || smtpEnabled;
+const SEND_URL = cfEnabled
   ? `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(env.CF_ACCOUNT_ID)}/email/sending/send`
   : null;
 
@@ -38,10 +42,92 @@ if (!enabled) {
   const msg = 'mail.disabled — MAIL_FROM, CF_ACCOUNT_ID or CF_EMAIL_API_TOKEN is not set; emails will be logged and skipped';
   if (isProd) logger.error(msg);
   else logger.warn(msg);
+} else if (smtpEnabled) {
+  logger.info('mail.smtp.dev — routing local emails to SMTP', { host: env.SMTP_HOST, port: env.SMTP_PORT });
 }
+
+// Minimal unauthenticated SMTP client for local Mailpit testing (!isProd only).
+const deliverSmtp = ({ to, subject, text, html }) =>
+  new Promise((resolve) => {
+    const socket = net.createConnection({ host: env.SMTP_HOST, port: env.SMTP_PORT });
+    socket.setTimeout(SEND_TIMEOUT_MS);
+
+    const boundary = `txp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const fromHeader = effectiveFrom.name
+      ? `"${effectiveFrom.name.replace(/"/g, '')}" <${effectiveFrom.address}>`
+      : effectiveFrom.address;
+    const dotStuff = (s) => String(s ?? '').replace(/\r?\n/g, '\r\n').replace(/^\./gm, '..');
+    const rawBody = [
+      `From: ${fromHeader}`,
+      `To: <${to}>`,
+      ...(REPLY_TO ? [`Reply-To: ${REPLY_TO}`] : []),
+      `Subject: ${String(subject).replace(/[\r\n]+/g, ' ')}`,
+      'MIME-Version: 1.0',
+      html
+        ? `Content-Type: multipart/alternative; boundary="${boundary}"`
+        : 'Content-Type: text/plain; charset=utf-8',
+      '',
+      ...(html
+        ? [
+            `--${boundary}`,
+            'Content-Type: text/plain; charset=utf-8',
+            '',
+            dotStuff(text),
+            `--${boundary}`,
+            'Content-Type: text/html; charset=utf-8',
+            '',
+            dotStuff(html),
+            `--${boundary}--`,
+          ]
+        : [dotStuff(text)]),
+      '.',
+    ].join('\r\n');
+
+    const steps = [
+      { expect: 220, send: 'EHLO localhost' },
+      { expect: 250, send: `MAIL FROM:<${effectiveFrom.address}>` },
+      { expect: 250, send: `RCPT TO:<${to}>` },
+      { expect: 250, send: 'DATA' },
+      { expect: 354, send: rawBody },
+      { expect: 250, send: 'QUIT' },
+    ];
+
+    let stepIdx = 0;
+    let buf = '';
+    let settled = false;
+    const finish = (out) => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(out);
+    };
+
+    socket.on('timeout', () => finish({ delivered: false, error: 'SMTP timeout' }));
+    socket.on('error', (err) => finish({ delivered: false, error: `${err.name}: ${err.message}` }));
+    socket.on('data', (chunk) => {
+      buf += chunk.toString('utf8');
+      const lines = buf.split('\r\n');
+      buf = lines.pop() ?? '';
+      for (const line of lines) {
+        if (!line || line[3] === '-') continue; // wait for final multiline SMTP line
+        const code = Number.parseInt(line.slice(0, 3), 10);
+        const step = steps[stepIdx];
+        if (!step) return;
+        if (code !== step.expect) {
+          return finish({ delivered: false, error: `SMTP ${code}: ${line}` });
+        }
+        stepIdx += 1;
+        socket.write(`${step.send}\r\n`);
+        if (stepIdx === steps.length) {
+          return finish({ delivered: true, id: `smtp-${Date.now()}` });
+        }
+      }
+    });
+  });
 
 // Sends one message. Resolves to { delivered, id?, error? }; never throws.
 const deliver = async ({ to, subject, text, html }) => {
+  if (smtpEnabled) return deliverSmtp({ to, subject, text, html });
   let res;
   let body = null;
   try {
@@ -52,7 +138,7 @@ const deliver = async ({ to, subject, text, html }) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM,
+        from: effectiveFrom,
         to,
         ...(REPLY_TO ? { reply_to: REPLY_TO } : {}),
         subject,
@@ -81,8 +167,8 @@ const deliver = async ({ to, subject, text, html }) => {
   return { delivered: true, id: result.message_id };
 };
 
-// Login page of the portal, included in credential emails.
-const loginUrl = () => (env.APP_URL ? `${env.APP_URL.replace(/\/+$/, '')}/vortex/login` : null);
+// Login page, included in credential emails.
+const loginUrl = () => (env.APP_URL ? `${env.APP_URL.replace(/\/+$/, '')}/login` : null);
 
 // User-supplied values (names, rejection reasons) must never be interpreted
 // as HTML inside the email body.
@@ -244,7 +330,7 @@ export const sendVerificationRejectedMail = ({ to, fullName, reason }) =>
 // ID card photo couldn't be read (pending), or an admin is giving a rejected
 // student a second try (previouslyRejected).
 export const sendReregisterRequestMail = ({ to, fullName, note, previouslyRejected = false }) => {
-  const registerUrl = env.APP_URL ? `${env.APP_URL.replace(/\/+$/, '')}/vortex/register` : null;
+  const registerUrl = env.APP_URL ? `${env.APP_URL.replace(/\/+$/, '')}/register` : null;
   const why = previouslyRejected
     ? 'Your earlier Vortex registration was not approved. The organizers have cleared it, so you can register again.'
     : 'We couldn’t verify your Vortex registration because your college ID card photo wasn’t clear enough. Your earlier registration has been removed.';

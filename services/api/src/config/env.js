@@ -35,7 +35,7 @@ const schema = z.object({
     .transform((v) => v === 'true'),
 
   // Public URL of the website (no trailing slash), e.g. https://your-domain.
-  // Used for links in emails: ${APP_URL}/vortex/login.
+  // Used for links in emails: ${APP_URL}/login.
   APP_URL: optionalString(z.string().url()),
 
   // Cloudflare Email Service (transactional email). Optional — when any of
@@ -47,6 +47,10 @@ const schema = z.object({
   MAIL_REPLY_TO: optionalString(z.string().email()),
   CF_ACCOUNT_ID: optionalString(z.string()),
   CF_EMAIL_API_TOKEN: optionalString(z.string()),
+
+  // Local dev-only SMTP fallback (e.g. Mailpit on 127.0.0.1:1025). Ignored in production.
+  SMTP_HOST: optionalString(z.string()),
+  SMTP_PORT: z.coerce.number().int().positive().default(1025),
 });
 
 const parsed = schema.safeParse(process.env);

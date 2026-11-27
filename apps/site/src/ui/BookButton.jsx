@@ -1,16 +1,14 @@
 import { EVENT, LABELS } from '../content/station.js';
+import { REGISTER_URL, goToRegister } from './portal.js';
 
-// The big cardboard ticket that opens the booking counter. The outer link
-// carries the drop shadow, the inner face is masked into a ticket shape.
-export default function BookButton({ onOpen }) {
+// The big pink cardboard ticket that forwards users to /register.
+// The outer link carries the drop shadow, the inner face is masked into a ticket shape.
+export default function BookButton() {
   return (
     <a
-      href="#book"
+      href={REGISTER_URL}
       className="book-ticket book-ticket--register"
-      onClick={(e) => {
-        e.preventDefault();
-        onOpen('book', null, e.currentTarget);
-      }}
+      onClick={goToRegister}
     >
       <span className="book-ticket-face">
         <span className="book-ticket-stub" aria-hidden="true">

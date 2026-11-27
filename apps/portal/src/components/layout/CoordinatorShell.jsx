@@ -31,7 +31,7 @@ export const CoordinatorShell = () => {
         'fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-border-dim bg-bg-surface-1 transition-transform duration-320 ease-out-expo md:translate-x-0',
         isOpen ? 'translate-x-0' : '-translate-x-full',
       )}>
-        <Link to="/" onClick={close} className="group flex items-center gap-3 border-b border-border-dim px-6 py-5 transition-colors duration-160 hover:bg-bg-surface-2">
+        <Link to="/coordinator" onClick={close} className="group flex items-center gap-3 border-b border-border-dim px-6 py-5 transition-colors duration-160 hover:bg-bg-surface-2">
           <InfinityIcon size={22} className="text-accent-cyan transition-transform duration-160 group-hover:scale-110" strokeWidth={2.5} />
           <span className="font-sans text-[12px] font-black tracking-[0.2em] text-text-primary">
             VORTEX <span className="text-text-dim">·</span> <span className="text-accent-cyan">COORDINATOR</span>

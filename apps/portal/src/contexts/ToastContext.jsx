@@ -13,11 +13,12 @@ const ICONS = {
   info:    Info,
 };
 
+// Station theme: left border accent strip, paper background, ink text.
 const TONE = {
-  success: 'border-status-live text-status-live',
-  error:   'border-status-crit text-status-crit',
-  warn:    'border-status-warn text-status-warn',
-  info:    'border-accent-cyan  text-accent-cyan',
+  success: { border: 'border-l-4 border-l-[#0b6e43] border-[#0b6e43]/30', icon: 'text-[#0b6e43]' },
+  error:   { border: 'border-l-4 border-l-[#b8102a] border-[#b8102a]/30', icon: 'text-[#b8102a]' },
+  warn:    { border: 'border-l-4 border-l-[#b45309] border-[#b45309]/30', icon: 'text-[#b45309]' },
+  info:    { border: 'border-l-4 border-l-[#c8235f] border-[#c8235f]/30', icon: 'text-[#c8235f]' },
 };
 
 export const ToastProvider = ({ children }) => {
@@ -55,28 +56,32 @@ export const ToastProvider = ({ children }) => {
       <div className="fixed bottom-4 right-4 z-[1000] flex w-full max-w-sm flex-col gap-2">
         {toasts.map((t) => {
           const Icon = ICONS[t.tone];
+          const toneStyle = TONE[t.tone];
           return (
             <div
               key={t.id}
               className={cn(
-                'fade-in flex items-start gap-3 rounded-[4px] border bg-bg-surface-2 p-3 pr-2 shadow-lg',
-                TONE[t.tone],
+                'fade-in flex items-start gap-3 border-2 bg-[#fffaf0] p-3 pr-2',
+                'shadow-[0_3px_0_#151320]',
+                toneStyle.border,
               )}
               role="status"
             >
-              <Icon size={18} className="mt-0.5 shrink-0" />
-              <div className="flex-1 text-text-primary">
+              <Icon size={18} className={cn('mt-0.5 shrink-0', toneStyle.icon)} />
+              <div className="flex-1 text-[#151320]">
                 {t.title && (
-                  <div className="font-sans text-[11px] uppercase tracking-wider text-text-secondary">
+                  <div
+                    className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] uppercase tracking-[0.18em] text-[#4a4458] mb-0.5"
+                  >
                     {t.title}
                   </div>
                 )}
-                <div className="font-mono text-[13px] leading-snug">{t.message}</div>
+                <div className="font-mono text-[13px] leading-snug text-[#151320]">{t.message}</div>
               </div>
               <button
                 aria-label="Dismiss"
                 onClick={() => dismiss(t.id)}
-                className="rounded p-1 text-text-dim hover:text-text-primary hover:bg-white/5"
+                className="rounded p-1 text-[#4a4458] hover:text-[#151320] hover:bg-[#f3e9d2]"
               >
                 <X size={14} />
               </button>

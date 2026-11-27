@@ -28,11 +28,11 @@ const Banner = () => {
   if (!needDomains && !needSize && !needBranch) return null;
 
   return (
-    <div role="alert" className="relative z-20 border-b border-status-warn/40 bg-status-warn/10">
+    <div role="alert" className="relative z-20 border-b-2 border-[#151320] bg-[#f5b800]/25 text-[#151320]">
       {needDomains && (
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
-          <AlertTriangle size={16} className="shrink-0 text-status-warn" />
-          <p className="flex-1 font-sans text-[13px] text-white">
+          <AlertTriangle size={16} className="shrink-0 text-[#a81f55]" />
+          <p className="flex-1 font-sans text-[13px] font-semibold text-[#151320]">
             The domains have changed. Please choose your {DOMAIN_PICKS} domains again.
           </p>
           <button type="button" className="glow-button" onClick={() => setOpen(true)}>Choose domains</button>
@@ -40,15 +40,15 @@ const Banner = () => {
       )}
       {needSize && (
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
-          <AlertTriangle size={16} className="shrink-0 text-status-warn" />
-          <p className="flex-1 font-sans text-[13px] text-white">Please tell us your T-shirt size.</p>
+          <AlertTriangle size={16} className="shrink-0 text-[#a81f55]" />
+          <p className="flex-1 font-sans text-[13px] font-semibold text-[#151320]">Please tell us your T-shirt size.</p>
           <TshirtSizePicker compact />
         </div>
       )}
       {needBranch && (
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
-          <AlertTriangle size={16} className="shrink-0 text-status-warn" />
-          <p className="flex-1 font-sans text-[13px] text-white">Please tell us your branch.</p>
+          <AlertTriangle size={16} className="shrink-0 text-[#a81f55]" />
+          <p className="flex-1 font-sans text-[13px] font-semibold text-[#151320]">Please tell us your branch.</p>
           <BranchPicker compact />
         </div>
       )}

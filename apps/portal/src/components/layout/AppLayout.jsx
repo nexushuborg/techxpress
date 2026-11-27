@@ -1,11 +1,12 @@
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { TopAppBar } from './TopAppBar.jsx';
-import { RetroGrid } from '../ui/RetroGrid.jsx';
 import { DomainBanner } from '../student/DomainBanner.jsx';
+import '../../styles/stationTheme.css';
 
-// Public-facing shell. Renders the nav + the routed page on top of the
-// retro grid background, with a smooth fade/slide between routes.
+// Student-facing shell (/dashboard, /teams). Applies the TechXpress
+// paper-theatre theme across the layout and body portals (modals/toasts).
 
 const PAGE_VARIANTS = {
   initial: { opacity: 0, y: 8 },
@@ -20,12 +21,19 @@ const PAGE_TRANSITION = {
 
 export const AppLayout = () => {
   const location = useLocation();
+
+  useEffect(() => {
+    document.body.dataset.txpTheme = 'station';
+    return () => {
+      delete document.body.dataset.txpTheme;
+    };
+  }, []);
+
   return (
-    <div className="relative min-h-screen">
-      <RetroGrid className="fixed inset-0 -z-10" />
+    <div className="txp-station-app relative min-h-screen">
       <TopAppBar />
       <DomainBanner />
-      <main className="relative">
+      <main className="relative pb-12">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}

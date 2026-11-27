@@ -20,37 +20,48 @@ import { issueLabel, formatRelative } from '../../utils/format.js';
 import { TeamChat } from '../../components/team/TeamChat.jsx';
 import { normalizeRegistrationNo } from '../../utils/registrationNo.js';
 
-// ── Status banner derived from rules engine evaluation ─────────────────────
+// ── Shared style tokens ───────────────────────────────────────────────────
+
+const CARD = 'bg-[#fffaf0] border-2 border-[#151320] shadow-[0_3px_0_#151320] p-5';
+const CARD_FLAT = 'bg-[#fffaf0] border-2 border-[#151320] p-4';
+const COMPACT_BTN = 'inline-flex items-center gap-1.5 !px-3 !py-1.5 !text-[12px] disabled:opacity-60';
+const SECTION_LABEL = "font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[12px] font-black uppercase tracking-[0.2em] text-[#4a4458]";
+
+// ── Status banner ─────────────────────────────────────────────────────────
+
 const StatusBanner = ({ status, issues }) => {
   if (status === 'DISQUALIFIED') {
     return (
-      <div className="flex items-center gap-3 rounded-[4px] border border-status-crit/40 bg-status-crit/5 px-4 py-3">
-        <XCircle size={16} className="text-status-crit" />
-        <div className="font-mono text-[12px] text-status-crit">This team has been disqualified by the organizers. Contact them if you think this is a mistake.</div>
+      <div className="flex items-center gap-3 border-2 border-[#b8102a] bg-[#fde8ea] px-4 py-3">
+        <XCircle size={16} className="text-[#b8102a] shrink-0" />
+        <div className="font-mono text-[12px] text-[#b8102a]">
+          This team has been disqualified by the organizers. Contact them if you think this is a mistake.
+        </div>
       </div>
     );
   }
   if (status === 'FINALIZED') {
     return (
-      <div className="flex items-center gap-3 rounded-[4px] border border-status-live/40 bg-status-live/5 px-4 py-3">
-        <ShieldCheck size={16} className="text-status-live" />
-        <div className="font-mono text-[12px] text-status-live">Team finalized — no further changes.</div>
+      <div className="flex items-center gap-3 border-2 border-[#0b6e43] bg-[#e6f4ee] px-4 py-3">
+        <ShieldCheck size={16} className="text-[#0b6e43] shrink-0" />
+        <div className="font-mono text-[12px] text-[#0b6e43]">Team finalized — no further changes.</div>
       </div>
     );
   }
   if (status === 'QUALIFIED') {
     return (
-      <div className="flex items-center gap-3 rounded-[4px] border border-status-live/40 bg-status-live/5 px-4 py-3">
-        <CheckCircle2 size={16} className="text-status-live" />
-        <div className="font-mono text-[12px] text-status-live">All rules met — leader can finalize.</div>
+      <div className="flex items-center gap-3 border-2 border-[#0b6e43] bg-[#e6f4ee] px-4 py-3">
+        <CheckCircle2 size={16} className="text-[#0b6e43] shrink-0" />
+        <div className="font-mono text-[12px] text-[#0b6e43]">All rules met — leader can finalize.</div>
       </div>
     );
   }
+  // FORMING or any other
   return (
-    <div className="space-y-2 rounded-none border border-white/10 bg-white/5 px-4 py-3">
+    <div className="border-2 border-[#b45309]/50 bg-[#fef3e2] px-4 py-3 space-y-2">
       <div className="flex items-center gap-3">
-        <AlertTriangle size={16} className="text-status-warn" />
-        <div className="font-mono text-[12px] text-status-warn">Not yet qualified.</div>
+        <AlertTriangle size={16} className="text-[#b45309] shrink-0" />
+        <div className="font-mono text-[12px] text-[#b45309]">Not yet qualified.</div>
       </div>
       <div className="flex flex-wrap gap-2 pl-7">
         {issues.map((i) => (
@@ -61,7 +72,8 @@ const StatusBanner = ({ status, issues }) => {
   );
 };
 
-// ── Create-team ───────────────────────────────────────────────────────────
+// ── Create team form ──────────────────────────────────────────────────────
+
 const CreateTeamForm = ({ onCreated }) => {
   const toast = useToast();
   const [name, setName] = useState('');
@@ -71,7 +83,9 @@ const CreateTeamForm = ({ onCreated }) => {
 
   const { data: domData } = useApi(() => api.get('/api/taxonomy/domains'), []);
   const { data: psData } = useApi(
-    () => domainId ? api.get('/api/taxonomy/problem-statements', { query: { domainId } }) : Promise.resolve({ problemStatements: [] }),
+    () => domainId
+      ? api.get('/api/taxonomy/problem-statements', { query: { domainId } })
+      : Promise.resolve({ problemStatements: [] }),
     [domainId],
   );
 
@@ -88,26 +102,51 @@ const CreateTeamForm = ({ onCreated }) => {
   };
 
   return (
-    <form onSubmit={submit} className="glass-card space-y-4">
-      <div className="flex items-center gap-3">
-        <Plus size={16} className="text-accent-cyan" />
-        <h2 className="font-sans text-[14px] uppercase tracking-[0.15em]">Create a team</h2>
+    <form onSubmit={submit} className={`${CARD} space-y-5`}>
+      {/* Section header */}
+      <div className="flex items-center gap-3 border-b-2 border-[#151320]/15 pb-4">
+        <div className="grid h-8 w-8 place-items-center bg-[#c8235f] text-white">
+          <Plus size={16} />
+        </div>
+        <h2 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[18px] font-black uppercase tracking-[0.08em] text-[#151320]">
+          Create a team
+        </h2>
       </div>
 
       <FormField label="Team name" required hint="Visible to the whole event. 2–60 chars.">
-        <input className="input-glass" minLength={2} maxLength={60} required value={name} onChange={(e) => setName(e.target.value)} />
+        <input
+          className="input-glass"
+          minLength={2}
+          maxLength={60}
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </FormField>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField label="Domain" required>
-          <select className="select-glass" required value={domainId} onChange={(e) => { setDomainId(e.target.value); setPsId(''); }}>
+          <select
+            className="select-glass"
+            required
+            value={domainId}
+            onChange={(e) => { setDomainId(e.target.value); setPsId(''); }}
+          >
             <option value="">Select…</option>
             {domData?.domains.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
           </select>
         </FormField>
 
-        <FormField label="Problem statement" hint={!domainId ? 'Pick a domain first' : 'Optional, can be set later by admins.'}>
-          <select className="select-glass" disabled={!domainId} value={psId} onChange={(e) => setPsId(e.target.value)}>
+        <FormField
+          label="Problem statement"
+          hint={!domainId ? 'Pick a domain first' : 'Optional, can be set later by admins.'}
+        >
+          <select
+            className="select-glass"
+            disabled={!domainId}
+            value={psId}
+            onChange={(e) => setPsId(e.target.value)}
+          >
             <option value="">— None —</option>
             {psData?.problemStatements?.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
           </select>
@@ -123,12 +162,12 @@ const CreateTeamForm = ({ onCreated }) => {
 };
 
 // ── Joinable list ─────────────────────────────────────────────────────────
+
 const JoinableList = () => {
   const toast = useToast();
   const [filter, setFilter] = useState('');
   const [busyTeamId, setBusyTeamId] = useState('');
   const { data, loading, refetch } = useApi(() => api.get('/api/teams/joinable'), []);
-  // My pending join requests, so a team I've already asked shows "Request sent".
   const outgoing = useApi(() => api.get('/api/join-requests/me'), []);
 
   const teams = useMemo(
@@ -136,7 +175,6 @@ const JoinableList = () => {
     [data, filter],
   );
 
-  // teamId → pending request id
   const pendingByTeam = useMemo(
     () => new Map((outgoing.data?.requests ?? []).map((r) => [r.team.id, r.id])),
     [outgoing.data],
@@ -148,10 +186,8 @@ const JoinableList = () => {
       await api.post(`/api/teams/${teamId}/join-requests`);
       toast.success('Join request sent.');
       refetch();
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      // Re-sync either way (e.g. a request sent from another tab → 409).
+    } catch (err) { toast.error(err.message); }
+    finally {
       await outgoing.refetch();
       setBusyTeamId('');
     }
@@ -164,37 +200,52 @@ const JoinableList = () => {
     try {
       await api.post(`/api/join-requests/${requestId}/cancel`);
       toast.info('Join request cancelled.');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
+    } catch (err) { toast.error(err.message); }
+    finally {
       await outgoing.refetch();
       setBusyTeamId('');
     }
   };
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="section-label">Open teams</h2>
+        <h2 className={SECTION_LABEL}>Open teams</h2>
         <div className="relative w-full max-w-xs">
-          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" />
-          <input className="input-glass !pl-10" placeholder="Filter by name…" value={filter} onChange={(e) => setFilter(e.target.value)} />
+          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#4a4458]" />
+          <input
+            className="input-glass !pl-10"
+            placeholder="Filter by name…"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
         </div>
       </div>
+
       {loading && <CardSkeleton rows={2} />}
       {!loading && teams.length === 0 && (
-        <Empty icon={Users} title="No teams to join" description="Either none have been created yet, or your filter excludes them all." />
+        <Empty
+          icon={Users}
+          title="No teams to join"
+          description="Either none have been created yet, or your filter excludes them all."
+        />
       )}
-      <div className="grid gap-4 md:grid-cols-2">
+
+      <div className="grid gap-4 md:grid-cols-1">
         {teams.map((t) => (
-          <article key={t.id} className="glass-card flat space-y-3">
+          <article key={t.id} className={`${CARD_FLAT} space-y-3`}>
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="font-sans text-[15px] font-bold text-text-primary">{t.name}</div>
-                <div className="font-mono text-[12px] text-text-secondary">{t.domain?.name} · led by {t.leader?.fullName}</div>
+                <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[16px] font-black uppercase tracking-[0.04em] text-[#151320]">
+                  {t.name}
+                </div>
+                <div className="font-mono text-[12px] text-[#4a4458]">
+                  {t.domain?.name} · led by {t.leader?.fullName}
+                </div>
               </div>
-              <Badge tone="cyan">{t.memberCount} member{t.memberCount !== 1 && 's'}</Badge>
+              <Badge tone="dim">{t.memberCount} member{t.memberCount !== 1 && 's'}</Badge>
             </div>
+
             {t.missing?.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {t.missing.map((m) => (
@@ -202,10 +253,11 @@ const JoinableList = () => {
                 ))}
               </div>
             )}
+
             {pendingByTeam.has(t.id) ? (
               <div className="flex flex-wrap items-center gap-2">
-                <button className="ghost-button inline-flex cursor-default items-center gap-2 !border-status-live/50 !text-status-live" disabled>
-                  <CheckCircle2 size={12} /> Request sent
+                <button className="ghost-button inline-flex cursor-default items-center gap-2 opacity-70" disabled>
+                  <CheckCircle2 size={12} className="text-[#0b6e43]" /> Request sent
                 </button>
                 <button
                   className="ghost-button inline-flex items-center gap-1 text-[11px]"
@@ -232,11 +284,14 @@ const JoinableList = () => {
   );
 };
 
-// ── Invite modal (leader only) ────────────────────────────────────────────
-// The leader picks the team's problem statement from every domain (the
-// team's domain follows it), or clears it. Only while the team is forming.
+// ── Problem statement modal ───────────────────────────────────────────────
+
 const ProblemStatementModal = ({ open, onClose, current, onSave }) => {
-  const list = useApi(() => (open ? api.get('/api/taxonomy/problem-statements') : Promise.resolve({ problemStatements: [] })), [open], { refetchOnFocus: false });
+  const list = useApi(
+    () => open ? api.get('/api/taxonomy/problem-statements') : Promise.resolve({ problemStatements: [] }),
+    [open],
+    { refetchOnFocus: false },
+  );
   const [psId, setPsId] = useState(current);
   const [busy, setBusy] = useState(false);
   const [seen, setSeen] = useState(open);
@@ -266,14 +321,19 @@ const ProblemStatementModal = ({ open, onClose, current, onSave }) => {
       footer={(
         <>
           <button type="button" className="ghost-button" onClick={onClose}>Cancel</button>
-          <button type="button" className="glow-button inline-flex items-center gap-2 disabled:opacity-60" disabled={busy || psId === current} onClick={save}>
+          <button
+            type="button"
+            className="glow-button inline-flex items-center gap-2 disabled:opacity-60"
+            disabled={busy || psId === current}
+            onClick={save}
+          >
             {busy && <Spinner size={12} />} Save
           </button>
         </>
       )}
     >
-      <p className="mb-3 font-mono text-[12px] text-text-secondary">
-        You can change this until the team is finalized. The team's domain follows the problem statement.
+      <p className="mb-4 font-mono text-[12px] text-[#4a4458]">
+        You can change this until the team is finalized. The team&apos;s domain follows the problem statement.
       </p>
       {list.loading ? <Spinner /> : (
         <select className="select-glass w-full" value={psId} onChange={(e) => setPsId(e.target.value)}>
@@ -289,16 +349,14 @@ const ProblemStatementModal = ({ open, onClose, current, onSave }) => {
   );
 };
 
+// ── Invite modal ──────────────────────────────────────────────────────────
+
 const InviteModal = ({ open, onClose, teamId, onSent }) => {
   const toast = useToast();
   const [registrationNo, setRegistrationNo] = useState('');
   const [busyId, setBusyId] = useState('');
 
-  const close = () => {
-    setRegistrationNo('');
-    setBusyId('');
-    onClose();
-  };
+  const close = () => { setRegistrationNo(''); setBusyId(''); onClose(); };
 
   const lookup = useApi(
     () => registrationNo.trim()
@@ -309,13 +367,12 @@ const InviteModal = ({ open, onClose, teamId, onSent }) => {
   );
 
   const candidates = useMemo(() => {
-    // Same canonical form the server uses, so "2024 ps01" finds "2024PS01".
     const needle = normalizeRegistrationNo(registrationNo);
     if (!needle) return [];
     const users = lookup.data?.users ?? [];
-    const exact = users.filter((user) => user.registrationNo === needle);
+    const exact = users.filter((u) => u.registrationNo === needle);
     if (exact.length) return exact;
-    return users.filter((user) => (user.registrationNo ?? '').includes(needle));
+    return users.filter((u) => (u.registrationNo ?? '').includes(needle));
   }, [lookup.data, registrationNo]);
 
   const sendInvite = async (inviteeId) => {
@@ -327,9 +384,7 @@ const InviteModal = ({ open, onClose, teamId, onSent }) => {
       close();
     } catch (err) {
       toast.error(err.message);
-    } finally {
-      setBusyId('');
-    }
+    } finally { setBusyId(''); }
   };
 
   return (
@@ -337,7 +392,7 @@ const InviteModal = ({ open, onClose, teamId, onSent }) => {
       <div className="space-y-4">
         <FormField label="Registration ID" required hint="Search by registration number to find the matching candidate.">
           <div className="relative">
-            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" />
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#4a4458]" />
             <input
               className="input-glass !pl-10"
               required
@@ -349,23 +404,23 @@ const InviteModal = ({ open, onClose, teamId, onSent }) => {
         </FormField>
 
         {!registrationNo.trim() && (
-            <Empty
-              icon={Search}
-              title="Search by registration ID"
-              description="Enter a registration number and the matching candidate will appear here."
-              className="rounded-none border border-white/10 bg-white/5 px-4 py-8"
-            />
+          <Empty
+            icon={Search}
+            title="Search by registration ID"
+            description="Enter a registration number and the matching candidate will appear here."
+            className="border-dashed py-8"
+          />
         )}
 
         {registrationNo.trim() && lookup.loading && <CardSkeleton rows={1} />}
 
         {registrationNo.trim() && !lookup.loading && candidates.length === 0 && (
-            <Empty
-              icon={Users}
-              title="No matching candidate"
-              description="No student matched that registration number."
-              className="rounded-none border border-white/10 bg-white/5 px-4 py-8"
-            />
+          <Empty
+            icon={Users}
+            title="No matching candidate"
+            description="No student matched that registration number."
+            className="border-dashed py-8"
+          />
         )}
 
         <div className="space-y-3">
@@ -377,25 +432,29 @@ const InviteModal = ({ open, onClose, teamId, onSent }) => {
                 : null;
 
             return (
-              <article key={candidate.id} className="glass-card flat space-y-3">
+              <article key={candidate.id} className={`${CARD_FLAT} space-y-3`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="font-sans text-[14px] font-bold text-text-primary">{candidate.fullName}</div>
-                    {candidate.email && <div className="font-mono text-[11px] text-text-secondary">{candidate.email}</div>}
+                    <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[15px] font-black uppercase text-[#151320]">
+                      {candidate.fullName}
+                    </div>
+                    {candidate.email && (
+                      <div className="font-mono text-[11px] text-[#4a4458]">{candidate.email}</div>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    <Badge tone="cyan">{candidate.domain?.name ?? 'No domain'}</Badge>
-                    {blockedReason && <Badge tone="dim">Unavailable</Badge>}
+                    <Badge tone="dim">{candidate.domain?.name ?? 'No domain'}</Badge>
+                    {blockedReason && <Badge tone="warn">Unavailable</Badge>}
                   </div>
                 </div>
 
-                <div className="font-mono text-[11px] text-text-secondary">
-                  Reg #: {candidate.registrationNo ?? '-'}
+                <div className="font-mono text-[11px] text-[#4a4458]">
+                  Reg #: {candidate.registrationNo ?? '—'}
                   {candidate.institution?.name ? ` · ${candidate.institution.name}` : ''}
                 </div>
 
                 {blockedReason && (
-                  <div className="font-mono text-[11px] text-text-dim">{blockedReason}</div>
+                  <div className="font-mono text-[11px] text-[#b8102a]">{blockedReason}</div>
                 )}
 
                 <div className="flex justify-end">
@@ -422,7 +481,59 @@ const InviteModal = ({ open, onClose, teamId, onSent }) => {
   );
 };
 
-// ── My team detail (in-team mode) ─────────────────────────────────────────
+// ── Queue panel (leader's pending requests / invites) ─────────────────────
+
+const QueuePanel = ({ title, icon: Icon, count, loading, emptyText, children }) => (
+  <section className="border-2 border-[#151320] bg-[#f3e9d2]">
+    <header className="flex items-center justify-between border-b-2 border-[#151320] bg-[#e6d5b0] px-4 py-3">
+      <div className="flex items-center gap-2">
+        {Icon && <Icon size={14} className="text-[#4a4458]" />}
+        <h3 className={SECTION_LABEL}>{title}</h3>
+      </div>
+      <Badge tone={count ? 'warn' : 'dim'}>{count}</Badge>
+    </header>
+    {loading ? (
+      <div className="p-4"><CardSkeleton rows={1} /></div>
+    ) : count === 0 ? (
+      <p className="px-4 py-5 text-center font-mono text-[12px] text-[#5c556c]">{emptyText}</p>
+    ) : (
+      <div className="divide-y-2 divide-[#151320]/15">{children}</div>
+    )}
+  </section>
+);
+
+// One person per row: avatar initials, name + subline, badges, actions
+const QueueRow = ({ name, sub, badges, actions }) => (
+  <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex min-w-0 items-center gap-3">
+      <div className="grid h-9 w-9 shrink-0 place-items-center border-2 border-[#151320] bg-[#151320] font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[12px] font-bold text-[#f3e9d2]">
+        {(name ?? '?').slice(0, 2).toUpperCase()}
+      </div>
+      <div className="min-w-0">
+        <div className="truncate font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-black uppercase text-[#151320]">
+          {name}
+        </div>
+        {sub && <div className="truncate font-mono text-[11px] text-[#4a4458]">{sub}</div>}
+        {badges && <div className="mt-1.5 flex flex-wrap gap-1">{badges}</div>}
+      </div>
+    </div>
+    <div className="flex shrink-0 justify-end gap-2">{actions}</div>
+  </div>
+);
+
+// ── Stat tile (members / female / experts) ────────────────────────────────
+
+const Stat = ({ label, value }) => (
+  <div>
+    <div className={SECTION_LABEL}>{label}</div>
+    <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[28px] font-black text-[#151320]">
+      {value}
+    </div>
+  </div>
+);
+
+// ── My team view ──────────────────────────────────────────────────────────
+
 const MyTeamView = ({ team, evaluation, onMutate }) => {
   const { user } = useAuth();
   const toast = useToast();
@@ -440,64 +551,42 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
   const invites  = useApi(() => api.get(`/api/teams/${team.id}/invites`), [team.id]);
   const requests = useApi(() => api.get(`/api/teams/${team.id}/join-requests`), [team.id]);
 
-  // Membership-change requests I've started — used to swap the "Request to
-  // leave" button for "Cancel leave request" while one is in flight, so
-  // users don't keep clicking and getting 409s.
   const myChanges = useApi(
     () => api.get('/api/membership-changes/initiated-me'),
     [],
     { pollMs: 5000 },
   );
   const initiatedChanges = myChanges.data?.changes ?? [];
-  const myPendingLeave = initiatedChanges.find(
-    (c) => c.team?.id === team.id && c.kind === 'LEAVE',
-  );
-  const myDisbandChanges = initiatedChanges.filter(
-    (c) => c.team?.id === team.id && c.kind === 'DISBAND',
-  );
+  const myPendingLeave = initiatedChanges.find((c) => c.team?.id === team.id && c.kind === 'LEAVE');
+  const myDisbandChanges = initiatedChanges.filter((c) => c.team?.id === team.id && c.kind === 'DISBAND');
   const teamDisbandPending = myDisbandChanges.length > 0;
   const disbandApprovedCount = myDisbandChanges.filter((c) => c.status === 'APPROVED').length;
   const disbandPendingCount = myDisbandChanges.filter((c) => c.status === 'PENDING').length;
 
-  // Leader-side: change requests awaiting MY approval (leave requests
-  // from members of this team, plus dismissals where I'm the target —
-  // although as leader I'd never receive a dismissal).
   const awaitingMe = useApi(
     () => api.get('/api/membership-changes/awaiting-me'),
     [],
     { pollMs: 5000 },
   );
   const myApprovalChanges = awaitingMe.data?.changes ?? [];
-  const myDisbandApproval = myApprovalChanges.find(
-    (c) => c.team?.id === team.id && c.kind === 'DISBAND',
-  );
-  const teamPendingForMe = myApprovalChanges.filter(
-    (c) => c.team?.id === team.id && c.kind !== 'DISBAND',
-  );
+  const myDisbandApproval = myApprovalChanges.find((c) => c.team?.id === team.id && c.kind === 'DISBAND');
+  const teamPendingForMe = myApprovalChanges.filter((c) => c.team?.id === team.id && c.kind !== 'DISBAND');
 
   const [busyId, setBusyId] = useState('');
-  const pendingInvites  = (invites.data?.invites ?? []).filter((i) => i.status === 'PENDING');
+  const pendingInvites  = (invites.data?.invites  ?? []).filter((i) => i.status === 'PENDING');
   const pendingRequests = (requests.data?.requests ?? []).filter((r) => r.status === 'PENDING');
 
-  // Run a team action, then refresh the team AND the invite / join-request
-  // lists (they live in this component, so onMutate alone doesn't reload
-  // them). Refresh even on failure so a stale card never lingers.
   const action = async (label, fn, id = '') => {
     setBusyId(id);
     try { await fn(); toast.success(label); }
     catch (err) { toast.error(err.message); }
-    finally {
-      invites.refetch();
-      requests.refetch();
-      onMutate();
-      setBusyId('');
-    }
+    finally { invites.refetch(); requests.refetch(); onMutate(); setBusyId(''); }
   };
 
   const finalize       = () => action('Team finalized.', () => api.post(`/api/teams/${team.id}/finalize`));
   const cancelInvite   = (id) => action('Invite cancelled.', () => api.post(`/api/invites/${id}/cancel`), id);
   const approveRequest = (id) => action('Request approved — member added.', () => api.post(`/api/join-requests/${id}/approve`), id);
-  const denyRequest    = (id) => action('Request denied.',   () => api.post(`/api/join-requests/${id}/deny`), id);
+  const denyRequest    = (id) => action('Request denied.', () => api.post(`/api/join-requests/${id}/deny`), id);
 
   const approveChange = async (id, kind) => {
     try {
@@ -507,36 +596,31 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
       } else {
         toast.success(kind === 'LEAVE' ? 'Member removed.' : 'Dismissal acknowledged.');
       }
-      myChanges.refetch();
-      awaitingMe.refetch();
-      onMutate();
+      myChanges.refetch(); awaitingMe.refetch(); onMutate();
     } catch (err) { toast.error(err.message); }
   };
+
   const denyChange = async (id, kind) => {
     try {
       await api.post(`/api/membership-changes/${id}/deny`);
       toast.success(kind === 'DISBAND' ? 'Dissolution request denied.' : 'Request denied.');
-      myChanges.refetch();
-      awaitingMe.refetch();
-      onMutate();
+      myChanges.refetch(); awaitingMe.refetch(); onMutate();
     } catch (err) { toast.error(err.message); }
   };
 
   const requestLeave = async () => {
     const ok = await confirm({
       title: 'Leave the team?',
-      message: 'Your leader must approve this. You\'ll stay a member until then.',
+      message: "Your leader must approve this. You'll stay a member until then.",
       confirmLabel: 'Submit request',
     });
     if (!ok) return;
     try {
       await api.post(`/api/teams/${team.id}/leave`, {});
       toast.success('Leave request submitted.');
-      myChanges.refetch();
-      onMutate();
+      myChanges.refetch(); onMutate();
     } catch (err) {
       toast.error(err.message);
-      // Sync UI in case backend already had a pending one (race / stale tab).
       myChanges.refetch();
     }
   };
@@ -545,22 +629,21 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
     if (!myPendingLeave) return;
     const ok = await confirm({
       title: 'Cancel leave request?',
-      message: 'You\'ll stay a member of the team. You can submit another request later.',
+      message: "You'll stay a member of the team. You can submit another request later.",
       confirmLabel: 'Cancel request',
     });
     if (!ok) return;
     try {
       await api.post(`/api/membership-changes/${myPendingLeave.id}/cancel`);
       toast.success('Leave request withdrawn.');
-      myChanges.refetch();
-      onMutate();
+      myChanges.refetch(); onMutate();
     } catch (err) { toast.error(err.message); }
   };
 
   const dismissMember = async (memberId, name) => {
     const ok = await confirm({
       title: `Dismiss ${name}?`,
-      message: 'They must acknowledge the dismissal before they\'re removed.',
+      message: "They must acknowledge the dismissal before they're removed.",
       tone: 'crit', confirmLabel: 'Send dismissal',
     });
     if (!ok) return;
@@ -570,7 +653,7 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
   const transferLeader = async (newLeaderId, name) => {
     const ok = await confirm({
       title: `Transfer leadership to ${name}?`,
-      message: 'You\'ll become a regular member. The new leader can manage invites and finalization.',
+      message: "You'll become a regular member. The new leader can manage invites and finalization.",
       confirmLabel: 'Transfer',
     });
     if (!ok) return;
@@ -582,16 +665,14 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
     if (teamDisbandPending) {
       const ok = await confirm({
         title: 'Cancel dissolve request?',
-        message: 'This keeps the team intact and clears every pending member approval for dissolution.',
+        message: "This keeps the team intact and clears every pending member approval for dissolution.",
         confirmLabel: 'Cancel request',
       });
       if (!ok) return;
       try {
         await api.post(`/api/membership-changes/${myDisbandChanges[0].id}/cancel`);
         toast.success('Dissolution request cancelled.');
-        myChanges.refetch();
-        awaitingMe.refetch();
-        onMutate();
+        myChanges.refetch(); awaitingMe.refetch(); onMutate();
       } catch (err) { toast.error(err.message); }
       return;
     }
@@ -599,8 +680,7 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
     const ok = await confirm({
       title: `Dissolve ${team.name}?`,
       message: 'Each non-leader member will receive an approval request. The team will dissolve only after every member approves.',
-      tone: 'crit',
-      confirmLabel: 'Send requests',
+      tone: 'crit', confirmLabel: 'Send requests',
     });
     if (!ok) return;
 
@@ -612,47 +692,46 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
         const count = res.pendingApprovals ?? 0;
         toast.success(`Dissolution request sent to ${count} member${count === 1 ? '' : 's'}.`);
       }
-      myChanges.refetch();
-      awaitingMe.refetch();
-      onMutate();
+      myChanges.refetch(); awaitingMe.refetch(); onMutate();
     } catch (err) { toast.error(err.message); }
   };
 
   return (
     <div className="space-y-6">
-      {/* Most urgent: membership changes waiting on THIS viewer — a member's
-          leave request (leader decides) or a dismissal (the member acknowledges). */}
+      {/* Action-needed banner (membership changes waiting on viewer) */}
       {!isFinalized && !teamDisbandPending && teamPendingForMe.length > 0 && (
-        <section className="border border-status-warn/60 bg-status-warn/[0.07] shadow-[0_0_0_1px_rgba(251,191,36,0.08),0_0_32px_-12px_rgba(251,191,36,0.45)]">
-          <header className="flex items-center justify-between gap-3 border-b border-status-warn/30 px-4 py-3">
+        <section className="border-2 border-[#b45309] bg-[#fef3e2]">
+          <header className="flex items-center justify-between gap-3 border-b-2 border-[#b45309]/50 bg-[#fef3e2] px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-status-warn opacity-60" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-status-warn" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#b45309] opacity-60" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#b45309]" />
               </span>
-              <AlertTriangle size={15} className="text-status-warn" />
-              <h3 className="font-sans text-[13px] font-black uppercase tracking-[0.16em] text-status-warn">Action needed</h3>
+              <AlertTriangle size={15} className="text-[#b45309]" />
+              <h3 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-black uppercase tracking-[0.14em] text-[#b45309]">
+                Action needed
+              </h3>
             </div>
             <Badge tone="warn">{teamPendingForMe.length}</Badge>
           </header>
-          <div className="divide-y divide-status-warn/15">
+          <div className="divide-y-2 divide-[#b45309]/20">
             {teamPendingForMe.map((c) => {
               const isLeave = c.kind === 'LEAVE';
               return (
                 <div key={c.id} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <div className="font-sans text-[14px] font-bold text-text-primary">
+                    <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-bold uppercase text-[#151320]">
                       {isLeave
                         ? <>{c.target?.fullName} wants to leave the team</>
                         : <>Your team leader wants to remove you from {team.name}</>}
                     </div>
-                    <div className="mt-0.5 font-mono text-[11px] text-text-secondary">
+                    <div className="mt-0.5 font-mono text-[11px] text-[#4a4458]">
                       {isLeave
                         ? 'Approve to remove them now, or deny to keep them in the team.'
                         : 'Accept to leave the team, or decline to stay.'}
                       {' · '}{formatRelative(c.createdAt)}
                     </div>
-                    {c.reason && <div className="mt-1.5 font-mono text-[12px] text-white/70">“{c.reason}”</div>}
+                    {c.reason && <div className="mt-1.5 font-mono text-[12px] text-[#151320]">"{c.reason}"</div>}
                   </div>
                   <div className="flex shrink-0 justify-end gap-2">
                     <button className={`ghost-button ${COMPACT_BTN}`} onClick={() => denyChange(c.id, c.kind)}>
@@ -669,38 +748,61 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
         </section>
       )}
 
-      <header className="glass-card space-y-4">
+      {/* Team header card */}
+      <header className={`${CARD} space-y-5`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <div className="kicker mb-1">{team.domain?.name}{team.problemStatement && ` · ${team.problemStatement.title}`}</div>
-            <h2 className="font-sans text-[24px] font-bold">{team.name}</h2>
+            <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[12px] font-bold uppercase tracking-[0.2em] text-[#a81f55] mb-1">
+              {team.domain?.name}{team.problemStatement && ` · ${team.problemStatement.title}`}
+            </div>
+            <h2 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[32px] font-black uppercase leading-[1] text-[#151320]">
+              {team.name}
+            </h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Badge tone={team.status === 'FINALIZED' ? 'live' : team.status === 'QUALIFIED' ? 'live' : 'warn'} dot>
+            <Badge
+              tone={team.status === 'FINALIZED' ? 'live' : team.status === 'QUALIFIED' ? 'live' : 'warn'}
+              dot
+            >
               {team.status}
             </Badge>
-            {isLeader && <Badge tone="cyan"><Crown size={10} className="mr-0.5"/> Leader</Badge>}
+            {isLeader && (
+              <Badge tone="cyan">
+                <Crown size={10} className="mr-0.5" /> Leader
+              </Badge>
+            )}
             {team.adminOverride && <Badge tone="warn">Admin override</Badge>}
           </div>
         </div>
 
         <StatusBanner status={team.status} issues={evaluation?.issues ?? []} />
 
-        <div className="grid grid-cols-3 gap-3 border-t border-white/10 pt-4">
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-4 border-t-2 border-[#151320]/20 pt-5">
           <Stat label="Members" value={`${team.memberCount}`} />
           <Stat label="Female"  value={`${team.femaleCount}`} />
           <Stat label="Experts" value={`${team.domainExpertCount}`} />
         </div>
 
-        <div className="flex flex-wrap gap-2 border-t border-white/10 pt-4">
+        {/* Action buttons */}
+        <div className="flex flex-wrap gap-2 border-t-2 border-[#151320]/20 pt-4">
           {isLeader && !isFinalized && !teamDisbandPending && (
-            <button className="glow-button inline-flex items-center gap-2" onClick={finalize} disabled={team.status !== 'QUALIFIED'}>
+            <button
+              className="glow-button inline-flex items-center gap-2"
+              onClick={finalize}
+              disabled={team.status !== 'QUALIFIED'}
+            >
               <ShieldCheck size={14} /> Finalize team
             </button>
           )}
           {isLeader && !isFinalized && !teamDisbandPending && (
-            <button className="ghost-button inline-flex items-center gap-2" onClick={() => setPsOpen(true)} disabled={team.status !== 'FORMING'}>
-              <ListChecks size={12} /> {team.problemStatement ? 'Change problem statement' : 'Choose problem statement'}
+            <button
+              className="ghost-button inline-flex items-center gap-2"
+              onClick={() => setPsOpen(true)}
+              disabled={team.status !== 'FORMING'}
+            >
+              <ListChecks size={12} />
+              {team.problemStatement ? 'Change problem statement' : 'Choose problem statement'}
             </button>
           )}
           {isLeader && !isFinalized && !teamDisbandPending && (
@@ -715,7 +817,8 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
               disabled={Boolean(dissolveBlockedReason)}
               title={dissolveBlockedReason ?? (teamDisbandPending ? 'Cancel team dissolution request' : 'Dissolve this team')}
             >
-              <XCircle size={12} /> {teamDisbandPending ? 'Cancel dissolve request' : 'Dissolve team'}
+              <XCircle size={12} />
+              {teamDisbandPending ? 'Cancel dissolve request' : 'Dissolve team'}
             </button>
           )}
           {!isLeader && !isFinalized && !myDisbandApproval && (
@@ -735,53 +838,53 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
         </div>
 
         {isLeader && dissolveBlockedReason && (
-          <div className="font-mono text-[11px] text-text-dim">{dissolveBlockedReason}</div>
+          <div className="font-mono text-[11px] text-[#5c556c]">{dissolveBlockedReason}</div>
         )}
       </header>
 
+      {/* Disband pending — leader side */}
       {isLeader && teamDisbandPending && (
-        <section className="glass-card flat space-y-3">
+        <section className={`${CARD_FLAT} space-y-3`}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="section-label">Team dissolution pending</h3>
-              <div className="font-mono text-[11px] text-text-secondary">
+              <h3 className={SECTION_LABEL}>Team dissolution pending</h3>
+              <div className="font-mono text-[11px] text-[#4a4458]">
                 The team will dissolve automatically after every non-leader member approves.
               </div>
             </div>
-            <Badge tone="warn">
-              {disbandApprovedCount}/{myDisbandChanges.length} approved
-            </Badge>
+            <Badge tone="warn">{disbandApprovedCount}/{myDisbandChanges.length} approved</Badge>
           </div>
-
           <div className="grid gap-3 md:grid-cols-2">
             {myDisbandChanges.map((c) => (
-              <div key={c.id} className="rounded-none border border-white/10 bg-white/5 px-4 py-3">
+              <div key={c.id} className="border-2 border-[#151320]/20 bg-[#f3e9d2] px-4 py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="font-sans text-[13px] font-bold text-text-primary">{c.target?.fullName}</div>
+                  <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-bold uppercase text-[#151320]">
+                    {c.target?.fullName}
+                  </div>
                   <Badge tone={c.status === 'APPROVED' ? 'live' : 'warn'}>{c.status}</Badge>
                 </div>
               </div>
             ))}
           </div>
-
-          <div className="font-mono text-[11px] text-text-dim">
+          <div className="font-mono text-[11px] text-[#5c556c]">
             {disbandPendingCount} approval{disbandPendingCount === 1 ? '' : 's'} still pending.
           </div>
         </section>
       )}
 
+      {/* Disband approval — member side */}
       {!isLeader && myDisbandApproval && (
-        <section className="glass-card flat space-y-3">
+        <section className={`${CARD_FLAT} space-y-3`}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="section-label">Team dissolution request</h3>
-              <div className="font-mono text-[11px] text-text-secondary">
+              <h3 className={SECTION_LABEL}>Team dissolution request</h3>
+              <div className="font-mono text-[11px] text-[#4a4458]">
                 {myDisbandApproval.status === 'PENDING'
                   ? 'The leader has requested to dissolve this team. It will be removed only if every non-leader member approves.'
                   : 'You approved dissolution. Waiting for the remaining approvals.'}
               </div>
               {myDisbandApproval.reason && (
-                <div className="mt-1 font-mono text-[11px] text-text-dim">"{myDisbandApproval.reason}"</div>
+                <div className="mt-1 font-mono text-[11px] text-[#5c556c]">"{myDisbandApproval.reason}"</div>
               )}
             </div>
             <Badge tone={myDisbandApproval.status === 'APPROVED' ? 'live' : 'warn'}>
@@ -792,40 +895,36 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
           {myDisbandApproval.status === 'PENDING' && (
             <div className="flex justify-end gap-2">
               <button className={`ghost-button ${COMPACT_BTN}`} onClick={() => denyChange(myDisbandApproval.id, 'DISBAND')}>
-                <XCircle size={12}/> Deny
+                <XCircle size={12} /> Deny
               </button>
               <button className={`danger-button ${COMPACT_BTN}`} onClick={() => approveChange(myDisbandApproval.id, 'DISBAND')}>
-                <CheckCircle2 size={12}/> Approve
+                <CheckCircle2 size={12} /> Approve
               </button>
             </div>
           )}
         </section>
       )}
 
+      {/* Members list */}
       <section className="space-y-3">
-        <h3 className="section-label">Members</h3>
+        <h3 className={SECTION_LABEL}>Members</h3>
         <div className="grid gap-3 md:grid-cols-2">
           {team.members.map((m) => {
             const isMe = m.user.id === user.id;
             const isThisLeader = m.role === 'LEADER';
-            // If this member already has an open change request, hide the
-            // leader's start-a-new-one buttons — they should approve the
-            // existing one in the panel below instead. Prevents the dual-
-            // dismiss / leave-then-dismiss 409 you can otherwise get.
-            const memberHasOpenChange = teamPendingForMe.some(
-              (c) => c.target?.id === m.user.id,
-            );
+            const memberHasOpenChange = teamPendingForMe.some((c) => c.target?.id === m.user.id);
             return (
-              <article key={m.user.id} className="glass-card flat flex items-center justify-between gap-3">
+              <article key={m.user.id} className={`${CARD_FLAT} flex items-center justify-between gap-3`}>
                 <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-none border border-white/10 bg-black font-sans text-[13px] font-bold text-white">
+                  {/* Avatar */}
+                  <div className="grid h-10 w-10 place-items-center border-2 border-[#151320] bg-[#151320] font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[13px] font-bold text-[#f3e9d2]">
                     {(m.user.fullName ?? '?').slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 font-sans text-[14px] font-bold">
+                    <div className="flex items-center gap-2 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-bold uppercase text-[#151320]">
                       {m.user.fullName} {isMe && <Badge tone="dim">you</Badge>}
                     </div>
-                    <div className="font-mono text-[11px] text-text-secondary">{m.user.email}</div>
+                    <div className="font-mono text-[11px] text-[#4a4458]">{m.user.email}</div>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -835,10 +934,16 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
                       <Badge tone="warn">Awaiting your decision ↑</Badge>
                     ) : (
                       <div className="flex gap-1">
-                        <button className="ghost-button text-[10px]" onClick={() => transferLeader(m.user.id, m.user.fullName)}>
+                        <button
+                          className="ghost-button text-[10px]"
+                          onClick={() => transferLeader(m.user.id, m.user.fullName)}
+                        >
                           Make leader
                         </button>
-                        <button className="danger-button text-[10px]" onClick={() => dismissMember(m.user.id, m.user.fullName)}>
+                        <button
+                          className="danger-button text-[10px]"
+                          onClick={() => dismissMember(m.user.id, m.user.fullName)}
+                        >
                           Dismiss
                         </button>
                       </div>
@@ -851,136 +956,93 @@ const MyTeamView = ({ team, evaluation, onMutate }) => {
         </div>
       </section>
 
-      {/* Leader's queues — shown only when something needs attention, above the chat. */}
+      {/* Leader queues */}
       {isLeader && !isFinalized && !teamDisbandPending && (pendingRequests.length > 0 || pendingInvites.length > 0) && (
         <div className={`grid gap-6 ${pendingRequests.length > 0 && pendingInvites.length > 0 ? 'lg:grid-cols-2' : ''}`}>
           {pendingRequests.length > 0 && (
-          <QueuePanel
-            title="Join requests"
-            icon={UserMinus}
-            count={pendingRequests.length}
-            loading={requests.loading}
-            emptyText="No one has asked to join yet."
-          >
-            {pendingRequests.map((r) => (
-              <QueueRow
-                key={r.id}
-                name={r.requester.fullName}
-                sub={r.requester.email}
-                badges={(
-                  <>
-                    {r.requester.domain?.name && <Badge tone="dim">{r.requester.domain.name}</Badge>}
-                    {r.requester.gender === 'FEMALE' && <Badge tone="live">Female</Badge>}
-                    {r.requester.isDomainExpert && <Badge tone="cyan">Expert</Badge>}
-                  </>
-                )}
-                actions={(
-                  <>
-                    <button className={`ghost-button ${COMPACT_BTN}`} disabled={busyId === r.id} onClick={() => denyRequest(r.id)}>
-                      <XCircle size={12} /> Deny
-                    </button>
-                    <button className={`glow-button ${COMPACT_BTN}`} disabled={busyId === r.id} onClick={() => approveRequest(r.id)}>
-                      {busyId === r.id ? <Spinner size={12} /> : <CheckCircle2 size={12} />} Approve
-                    </button>
-                  </>
-                )}
-              />
-            ))}
-          </QueuePanel>
+            <QueuePanel
+              title="Join requests"
+              icon={UserMinus}
+              count={pendingRequests.length}
+              loading={requests.loading}
+              emptyText="No one has asked to join yet."
+            >
+              {pendingRequests.map((r) => (
+                <QueueRow
+                  key={r.id}
+                  name={r.requester.fullName}
+                  sub={r.requester.email}
+                  badges={(
+                    <>
+                      {r.requester.domain?.name && <Badge tone="dim">{r.requester.domain.name}</Badge>}
+                      {r.requester.gender === 'FEMALE' && <Badge tone="live">Female</Badge>}
+                      {r.requester.isDomainExpert && <Badge tone="cyan">Expert</Badge>}
+                    </>
+                  )}
+                  actions={(
+                    <>
+                      <button className={`ghost-button ${COMPACT_BTN}`} disabled={busyId === r.id} onClick={() => denyRequest(r.id)}>
+                        <XCircle size={12} /> Deny
+                      </button>
+                      <button className={`glow-button ${COMPACT_BTN}`} disabled={busyId === r.id} onClick={() => approveRequest(r.id)}>
+                        {busyId === r.id ? <Spinner size={12} /> : <CheckCircle2 size={12} />} Approve
+                      </button>
+                    </>
+                  )}
+                />
+              ))}
+            </QueuePanel>
           )}
 
           {pendingInvites.length > 0 && (
-          <QueuePanel
-            title="Pending invites"
-            icon={UserPlus}
-            count={pendingInvites.length}
-            loading={invites.loading}
-            emptyText="No invites waiting for a reply."
-          >
-            {pendingInvites.map((i) => (
-              <QueueRow
-                key={i.id}
-                name={i.invitee.fullName}
-                sub={i.invitee.email}
-                badges={<Badge tone="warn" dot>Awaiting reply</Badge>}
-                actions={(
-                  <button className={`ghost-button ${COMPACT_BTN}`} disabled={busyId === i.id} onClick={() => cancelInvite(i.id)}>
-                    {busyId === i.id ? <Spinner size={12} /> : <XCircle size={12} />} Cancel
-                  </button>
-                )}
-              />
-            ))}
-          </QueuePanel>
+            <QueuePanel
+              title="Pending invites"
+              icon={UserPlus}
+              count={pendingInvites.length}
+              loading={invites.loading}
+              emptyText="No invites waiting for a reply."
+            >
+              {pendingInvites.map((i) => (
+                <QueueRow
+                  key={i.id}
+                  name={i.invitee.fullName}
+                  sub={i.invitee.email}
+                  badges={<Badge tone="warn" dot>Awaiting reply</Badge>}
+                  actions={(
+                    <button className={`ghost-button ${COMPACT_BTN}`} disabled={busyId === i.id} onClick={() => cancelInvite(i.id)}>
+                      {busyId === i.id ? <Spinner size={12} /> : <XCircle size={12} />} Cancel
+                    </button>
+                  )}
+                />
+              ))}
+            </QueuePanel>
           )}
         </div>
       )}
 
       <TeamChat key={team.id} teamId={team.id} />
 
-
       <InviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} teamId={team.id} onSent={onMutate} />
       <ProblemStatementModal
         open={psOpen}
         onClose={() => setPsOpen(false)}
         current={team.problemStatement?.id ?? ''}
-        onSave={(psId) => action(psId ? 'Problem statement updated.' : 'Problem statement cleared.', () => api.patch(`/api/teams/${team.id}/problem-statement`, { psId: psId || null }))}
+        onSave={(psId) =>
+          action(
+            psId ? 'Problem statement updated.' : 'Problem statement cleared.',
+            () => api.patch(`/api/teams/${team.id}/problem-statement`, { psId: psId || null }),
+          )
+        }
       />
     </div>
   );
 };
 
-// Small, single-line action buttons (icon beside the label).
-const COMPACT_BTN = 'inline-flex items-center gap-1.5 !px-3 !py-1.5 !text-[12px] disabled:opacity-60';
-
-// Bordered panel with a header + count, used for the leader's queues.
-const QueuePanel = ({ title, icon: Icon, count, loading, emptyText, children }) => (
-  <section className="border border-white/10 bg-white/[0.02]">
-    <header className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-      <div className="flex items-center gap-2">
-        {Icon && <Icon size={14} className="text-white/40" />}
-        <h3 className="section-label !text-white/70">{title}</h3>
-      </div>
-      <Badge tone={count ? 'warn' : 'dim'}>{count}</Badge>
-    </header>
-    {loading ? (
-      <div className="p-4"><CardSkeleton rows={1} /></div>
-    ) : count === 0 ? (
-      <p className="px-4 py-5 text-center font-mono text-[12px] text-white/35">{emptyText}</p>
-    ) : (
-      <div className="divide-y divide-white/5">{children}</div>
-    )}
-  </section>
-);
-
-// One person per row: avatar, name + subline, badges, actions on the right.
-const QueueRow = ({ name, sub, badges, actions }) => (
-  <div className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-    <div className="flex min-w-0 items-center gap-3">
-      <div className="grid h-9 w-9 shrink-0 place-items-center border border-white/10 bg-black font-sans text-[12px] font-bold text-white">
-        {(name ?? '?').slice(0, 2).toUpperCase()}
-      </div>
-      <div className="min-w-0">
-        <div className="truncate font-sans text-[13px] font-bold text-text-primary">{name}</div>
-        {sub && <div className="truncate font-mono text-[11px] text-text-secondary">{sub}</div>}
-        {badges && <div className="mt-1.5 flex flex-wrap gap-1">{badges}</div>}
-      </div>
-    </div>
-    <div className="flex shrink-0 justify-end gap-2">{actions}</div>
-  </div>
-);
-
-const Stat = ({ label, value }) => (
-  <div>
-    <div className="section-label">{label}</div>
-    <div className="font-sans text-[22px] font-bold text-text-primary">{value}</div>
-  </div>
-);
-
 // ── Page entry ────────────────────────────────────────────────────────────
+
 export const TeamFormationPage = () => {
   const myTeam = useApi(() => api.get('/api/teams/mine'), [], { pollMs: 5000 });
 
-  // Need full detail (with members) — list is light. Refetch detail when needed.
   const detail = useApi(
     () => myTeam.data?.team ? api.get(`/api/teams/${myTeam.data.team.id}`) : Promise.resolve(null),
     [myTeam.data?.team?.id],
@@ -990,20 +1052,15 @@ export const TeamFormationPage = () => {
     [myTeam.data?.team?.id],
   );
 
-  // Refetch my-team detail when invite/request events touch us.
   useSocketEvent('invite:received', () => { myTeam.refetch(); }, []);
 
-  const refresh = () => {
-    myTeam.refetch();
-    detail.refetch();
-    evaluation.refetch();
-  };
+  const refresh = () => { myTeam.refetch(); detail.refetch(); evaluation.refetch(); };
 
   return (
-    <section className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
+    <section className="txp-station-app mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
       <PageHeader
         kicker="Team Hub"
-        title="Squad formation"
+        title="Squad Formation"
         description="Create a team, send invites, request to join, transfer leadership, and finalize when ready."
       />
 

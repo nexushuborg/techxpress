@@ -1,7 +1,8 @@
 // Builds both frontends and assembles the Worker's static folder:
 //
-//   apps/site   -> dist/          (train experience, served at /)
-//   apps/portal -> dist/vortex/   (VORTEX portal, Vite base /vortex/)
+//   apps/site   -> dist/                      (train experience, served at /)
+//   apps/portal -> dist/_app/index.html       (app shell for /login, /dashboard, ...)
+//               +  dist/app-assets/*          (portal's hashed Vite assets)
 //
 // Usage:
 //   node scripts/build.mjs               install each app (npm ci), then build
@@ -12,7 +13,7 @@
 // environment, as Vite normally does.
 
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,8 +22,8 @@ const out = join(root, 'dist');
 const install = !process.argv.includes('--no-install');
 
 const apps = [
-  { name: 'site', dir: join(root, 'apps/site'), target: out },
-  { name: 'portal', dir: join(root, 'apps/portal'), target: join(out, 'vortex') },
+  { name: 'site', dir: join(root, 'apps/site') },
+  { name: 'portal', dir: join(root, 'apps/portal') },
 ];
 
 const run = (cwd, args) => {
@@ -44,15 +45,22 @@ for (const app of apps) {
 }
 
 rmSync(out, { recursive: true, force: true });
-for (const app of apps) {
-  cpSync(join(app.dir, 'dist'), app.target, { recursive: true });
+cpSync(join(root, 'apps/site/dist'), out, { recursive: true });
+
+const portalDist = join(root, 'apps/portal/dist');
+const portalShellDir = join(out, '_app');
+mkdirSync(portalShellDir, { recursive: true });
+for (const entry of readdirSync(portalDist)) {
+  const src = join(portalDist, entry);
+  const dest = entry === 'index.html' ? join(portalShellDir, 'index.html') : join(out, entry);
+  cpSync(src, dest, { recursive: true });
 }
 
-for (const page of ['index.html', 'vortex/index.html']) {
+for (const page of ['index.html', '_app/index.html']) {
   if (!existsSync(join(out, page))) {
     console.error(`build failed: dist/${page} is missing`);
     process.exit(1);
   }
 }
 
-console.log('\nbuilt dist/ (site) and dist/vortex/ (portal)');
+console.log('\nbuilt dist/ (site) and dist/_app/ (app shell)');

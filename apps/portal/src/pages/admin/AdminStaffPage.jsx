@@ -52,7 +52,7 @@ export const AdminStaffPage = () => {
     }
   };
 
-  const loginUrl = `${window.location.origin}/vortex/login`;
+  const loginUrl = `${window.location.origin}/login`;
   const handover = (s) => `Vortex login\n${loginUrl}\nEmail: ${s.email}\nPassword: ${s.password}`;
 
   return (

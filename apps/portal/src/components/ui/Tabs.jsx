@@ -1,9 +1,16 @@
 import { cn } from '../../utils/cn.js';
 
-// Horizontal tab strip. Caller controls active state via `value`.
+// Station-themed horizontal tab strip. Barlow Condensed uppercase labels,
+// ink border bottom indicator on active tab.
 
 export const Tabs = ({ value, onChange, items, className }) => (
-  <div className={cn('flex justify-start md:justify-center overflow-x-auto flex-nowrap gap-1 border-b border-border-dim no-scrollbar', className)}>
+  <div
+    className={cn(
+      'flex justify-start overflow-x-auto flex-nowrap gap-0 no-scrollbar',
+      'border-b-2 border-[#151320]',
+      className,
+    )}
+  >
     {items.map((item) => {
       const active = value === item.value;
       return (
@@ -11,22 +18,29 @@ export const Tabs = ({ value, onChange, items, className }) => (
           key={item.value}
           onClick={() => onChange(item.value)}
           className={cn(
-            'relative flex items-center gap-2 px-6 py-4 font-sans text-[13px] font-semibold transition-colors duration-160 ease-out-expo',
-            active ? 'text-accent-cyan' : 'text-text-secondary hover:text-text-primary',
+            "relative flex items-center gap-2 px-5 py-3 transition-colors duration-150",
+            "font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-bold uppercase tracking-[0.12em]",
+            active
+              ? 'text-[#c8235f] bg-[#fffaf0]'
+              : 'text-[#4a4458] bg-transparent hover:text-[#151320] hover:bg-[#f3e9d2]',
           )}
         >
-          {item.icon && <item.icon size={16} />}
+          {item.icon && <item.icon size={15} />}
           <span>{item.label}</span>
           {item.badge != null && (
-            <span className={cn(
-              'rounded-sm px-1.5 py-0.5 font-mono text-[10px] font-bold transition-all duration-160',
-              active ? 'bg-accent-cyan-soft text-accent-cyan' : 'bg-bg-surface-2 text-text-dim',
-            )}>
+            <span
+              className={cn(
+                'px-1.5 py-0 font-mono text-[10px] font-bold border',
+                active
+                  ? 'bg-[#fce7ef] text-[#c8235f] border-[#c8235f]/40'
+                  : 'bg-[#f3e9d2] text-[#4a4458] border-[#151320]/25',
+              )}
+            >
               {item.badge}
             </span>
           )}
           {active && (
-            <span className="absolute inset-x-0 -bottom-px h-[2px] bg-accent-cyan shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+            <span className="absolute inset-x-0 -bottom-[2px] h-[3px] bg-[#c8235f]" />
           )}
         </button>
       );

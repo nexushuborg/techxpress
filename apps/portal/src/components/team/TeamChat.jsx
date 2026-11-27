@@ -147,18 +147,18 @@ export const TeamChat = ({ teamId }) => {
   };
 
   return (
-    <section className="border border-white/10 bg-white/[0.02]">
-      <header className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+    <section className="border-2 border-[#151320] bg-[#fffaf0] shadow-[0_3px_0_#151320]">
+      <header className="flex items-center justify-between border-b-2 border-[#151320] bg-[#f3e9d2] px-4 py-3">
         <div className="flex items-center gap-2">
-          <MessageSquare size={14} className="text-white/40" />
-          <h3 className="section-label !text-white/70">Team chat</h3>
+          <MessageSquare size={15} className="text-[#a81f55]" />
+          <h3 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[18px] font-extrabold uppercase tracking-[0.08em] text-[#151320]">Team chat</h3>
         </div>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-white/35">
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-[#4a4458]">
           <Lock size={10} /> Members only
         </span>
       </header>
 
-      <div ref={scrollRef} onScroll={onScroll} className="scroll-panel h-[420px] space-y-3 overflow-y-auto overscroll-contain px-4 py-4">
+      <div ref={scrollRef} onScroll={onScroll} className="scroll-panel h-[420px] space-y-3 overflow-y-auto overscroll-contain bg-[#fffaf0] px-4 py-4">
         {hasMore && (
           <div className="flex justify-center">
             <button className="ghost-button inline-flex items-center gap-1.5 !px-3 !py-1 !text-[11px]" onClick={loadOlder} disabled={loadingOlder}>
@@ -167,12 +167,12 @@ export const TeamChat = ({ teamId }) => {
           </div>
         )}
 
-        {loading && <div className="flex justify-center py-10 text-white/40"><Spinner size={16} /></div>}
+        {loading && <div className="flex justify-center py-10 text-[#4a4458]"><Spinner size={16} /></div>}
 
         {!loading && messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-            <MessageSquare size={22} className="text-white/20" />
-            <p className="font-mono text-[12px] text-white/40">No messages yet. Say hi to your team 👋</p>
+            <MessageSquare size={22} className="text-[#4a4458]/50" />
+            <p className="font-mono text-[12px] text-[#4a4458]">No messages yet. Say hi to your team 👋</p>
           </div>
         )}
 
@@ -184,21 +184,22 @@ export const TeamChat = ({ teamId }) => {
           return (
             <div key={m.id} className={cn('flex gap-2.5', mine ? 'flex-row-reverse' : 'flex-row', grouped && '!mt-1')}>
               <div className={cn(
-                'grid h-8 w-8 shrink-0 place-items-center border border-white/10 bg-black font-sans text-[11px] font-bold text-white',
+                'grid h-8 w-8 shrink-0 place-items-center border-2 border-[#151320] font-["Barlow_Condensed","Arial_Narrow",sans-serif] text-[13px] font-extrabold',
+                mine ? 'bg-[#f5b800] text-[#151320]' : 'bg-[#151320] text-[#f3e9d2]',
                 grouped && 'invisible',
               )}>
                 {initials(m.sender.fullName)}
               </div>
               <div className={cn('flex max-w-[78%] flex-col', mine ? 'items-end' : 'items-start')}>
                 {!grouped && (
-                  <div className="mb-1 flex items-baseline gap-2 font-mono text-[10px] text-white/40">
-                    <span className="font-bold text-white/70">{mine ? 'You' : m.sender.fullName}</span>
+                  <div className="mb-1 flex items-baseline gap-2 font-mono text-[10px] text-[#4a4458]">
+                    <span className="font-bold text-[#151320]">{mine ? 'You' : m.sender.fullName}</span>
                     <span>{timeLabel(m.createdAt)}</span>
                   </div>
                 )}
                 <div className={cn(
-                  'whitespace-pre-wrap break-words border px-3 py-2 font-sans text-[13px] leading-relaxed',
-                  mine ? 'border-accent-cyan/30 bg-accent-cyan-soft text-text-primary' : 'border-white/10 bg-white/[0.04] text-text-primary',
+                  'whitespace-pre-wrap break-words border-[1.5px] border-[#151320] px-3 py-2 font-sans text-[13px] leading-relaxed',
+                  mine ? 'bg-[#f3e9d2] text-[#151320]' : 'bg-white text-[#151320]',
                 )}>
                   {m.body}
                 </div>
@@ -208,7 +209,7 @@ export const TeamChat = ({ teamId }) => {
         })}
       </div>
 
-      <div className="border-t border-white/10 p-3">
+      <div className="border-t-2 border-[#151320] bg-[#f3e9d2] p-3">
         <div className="flex items-end gap-2">
           <textarea
             className="input-glass min-h-[44px] max-h-32 resize-none !py-2.5"
@@ -228,7 +229,7 @@ export const TeamChat = ({ teamId }) => {
           </button>
         </div>
         {draft.length > MAX_LEN * 0.8 && (
-          <div className="mt-1 text-right font-mono text-[10px] text-white/40">{draft.length} / {MAX_LEN}</div>
+          <div className="mt-1 text-right font-mono text-[10px] text-[#4a4458]">{draft.length} / {MAX_LEN}</div>
         )}
       </div>
     </section>

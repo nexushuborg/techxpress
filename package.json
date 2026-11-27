@@ -23,5 +23,9 @@
     "playwright": "^1.65.1",
     "sharp": "^0.35.5",
     "wrangler": "^4.166.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^6.3.0",
+    "vite": "^8.4.0"
   }
 }

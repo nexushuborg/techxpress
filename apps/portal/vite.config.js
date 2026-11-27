@@ -3,9 +3,12 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
 export default defineConfig({
-  // The portal is served under /vortex/ on the TechXpress domain; the train
-  // site owns /. Asset URLs and the router basename (main.jsx) follow this.
-  base: '/vortex/',
+  // Served at root paths (/login, /dashboard, ...) on the TechXpress domain;
+  // apps/site owns /. Distinct assetsDir prevents collisions in dist/.
+  base: '/',
+  build: {
+    assetsDir: 'app-assets',
+  },
   plugins: [react()],
   resolve: {
     alias: {

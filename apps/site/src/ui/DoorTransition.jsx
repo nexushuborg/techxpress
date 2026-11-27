@@ -9,10 +9,11 @@ export default function DoorTransition() {
 
   useEffect(() => {
     let timer;
-    const onGo = () => {
+    const onGo = (e) => {
+      const target = e?.detail?.url || PORTAL_URL;
       const less = prefersLessMotion();
       setPhase(less ? 'fade' : 'door');
-      timer = setTimeout(() => window.location.assign(PORTAL_URL), less ? 150 : 600);
+      timer = setTimeout(() => window.location.assign(target), less ? 150 : 600);
     };
     const onShow = () => {
       clearTimeout(timer);

@@ -19,10 +19,10 @@ npm run lint
 | `/interior` | `InteriorScene`: carriage interior with the hanging sign (About, Register, Ask) |
 | `/about` | About page |
 | `/ask` | Ask Rajesh (chat mock-up) |
-| `/register` | Redirects to the VORTEX portal home at `/vortex/` (full page load: the portal is a separate app). The sign's Register button goes there too |
+| `/register` | Redirects to `/#book` (opens the `ReservationCounter` registration form on the site) |
 
 ## Notes
 
 - Lenis and the global styles in `src/index.css` (hidden scrollbars, body overflow) apply to this app only; the portal is a separate bundle.
-- `public/_headers` is copied to the root of the Worker's `dist/` and sets caching for **both** apps: hashed assets under `/assets/` and `/vortex/assets/` are immutable, page shells are `no-cache`.
+- `public/_headers` is copied to the root of the Worker's `dist/` and sets caching for **both** apps: hashed assets under `/assets/` and `/app-assets/` are immutable, page shells (`/` and `/_app/`) are `no-cache`.
 - `source-assets/` holds the original artwork and video; it isn't part of the build.

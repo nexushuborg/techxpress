@@ -50,7 +50,7 @@ export const LABELS = {
   pnr: { english: 'PNR status', hindi: 'पी.एन.आर. स्थिति', hint: 'Check your registration' },
   countdown: { english: 'Departure board', hindi: 'प्रस्थान', hint: 'Countdown to the hackathon' },
   book: { english: 'Register here', hindi: 'यहाँ रजिस्टर करें', hint: 'Register for TechXpress' },
-  login: { english: 'Login here', hindi: 'यहाँ लॉगिन करें', hint: 'Log in to VORTEX' },
+  login: { english: 'Login here', hindi: 'यहाँ लॉगिन करें', hint: 'Log in' },
   guide: { english: 'Station guide', hindi: 'स्टेशन गाइड' },
 };
 
@@ -203,7 +203,7 @@ export const BOOK = {
   closedAfter: 'Booking closed',
   successTitle: 'Reservation slip',
   checkPnr: 'Check PNR status',
-  login: 'Log in to VORTEX',
+  login: 'Log in ',
 };
 
 // ── Added for the station UI (src/ui/). ⚠ CONFIRM the wording. ────────────

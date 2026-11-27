@@ -23,135 +23,36 @@ import { formatRelative, titleCase } from '../../utils/format.js';
 import { DomainPicker, DOMAINS_SAVED_EVENT } from '../../components/student/DomainPicker.jsx';
 import { TshirtSizePicker } from '../../components/student/TshirtSizePicker.jsx';
 
+// Role → badge tone mapping
 const ROLE_TONE = { ADMIN: 'crit', JURY: 'cyan', COORDINATOR: 'warn', STUDENT: 'live' };
-const EXPLORE_CARD_CLASS = 'glass-card flat min-h-[188px] rounded-none px-5 py-6 transition duration-200 ease-out hover:border-white hover:bg-white/[0.04]';
-const joinList = (values) => values?.length ? values.join(', ') : '-';
+const joinList = (values) => values?.length ? values.join(', ') : '—';
 
-const ProfileTab = ({ user, myTeam }) => {
-  const [editDomains, setEditDomains] = useState(false);
-  return (
-  <div className="grid gap-6 md:grid-cols-3">
-    <section className="glass-card flat md:col-span-2">
-      <div className="mb-6 flex items-center gap-3">
-        <User size={18} className="text-white" />
-        <h2 className="font-sans text-[14px] font-black uppercase tracking-[0.2em] text-white">Profile Identity</h2>
-      </div>
-      <dl className="grid grid-cols-1 gap-y-3 sm:grid-cols-2">
-        <Field icon={User} label="Name" value={user.fullName} />
-        <Field icon={Mail} label="Email" value={user.email} />
-        <Field icon={IdCard} label="Passenger ref" value={user.publicId ?? '-'} />
-        <Field icon={IdCard} label="Registration #" value={user.registrationNo ?? '-'} />
-        <Field icon={GraduationCap} label="Institution" value={user.institution?.name ?? '-'} />
-        <Field icon={Layers} label="Preferred Domain" value={user.domain?.name ?? '-'} />
-        <Field icon={GraduationCap} label="Degree" value={user.degree ?? '-'} />
-        {user.branch ? <Field icon={GraduationCap} label="Branch" value={user.branch} /> : null}
-        <Field icon={BookOpen} label="Year / Semester" value={user.yearSemester ?? '-'} />
-        <Field icon={Mail} label="Phone" value={user.phone ?? '-'} />
-        {user.role === 'STUDENT' ? (
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] text-white/30"><Shirt size={12} /> T-shirt size</div>
-            <TshirtSizePicker key={user.tshirtSize ?? ''} current={user.tshirtSize ?? ''} compact />
-          </div>
-        ) : (
-          <Field icon={Shirt} label="T-shirt size" value={user.tshirtSize ?? '-'} />
-        )}
-        <Field icon={Briefcase} label="Preferred Team Role" value={user.preferredTeamRole ?? '-'} />
-        <Field icon={Award} label="Contribution Areas" value={joinList(user.contributionAreas)} />
-      </dl>
+// ── Shared micro-components ───────────────────────────────────────────────
 
-      <ProfileCopySection title="Bio" value={user.bio} />
-      {user.role === 'STUDENT' || user.preferredDomainDetails?.length ? (
-        <div className="mt-8 border-t border-white/5 pt-6">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/30">Preferred domains</div>
-            {user.role === 'STUDENT' && (
-              <button type="button" className="ghost-button" onClick={() => setEditDomains(true)}>Edit domains</button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {user.preferredDomainDetails?.length
-              ? user.preferredDomainDetails.map((domain) => <Badge key={domain.id} tone="dim">{domain.name}</Badge>)
-              : <span className="font-mono text-[12px] text-status-warn">No domains chosen yet.</span>}
-          </div>
-          <DomainPicker
-            open={editDomains}
-            onClose={() => setEditDomains(false)}
-            initial={user.preferredDomains ?? []}
-          />
-        </div>
-      ) : null}
-      <ProfileCopySection title="Technical Skills" value={user.technicalSkills} />
-      <ProfileCopySection title="Non-Technical Skills" value={user.nonTechnicalSkills} />
-      <ProfileCopySection title="Achievements" value={user.achievements} />
-      <ProfileCopySection title="Hackathon Experience" value={user.hackathonExperience} />
-      <ProfileCopySection title="Certifications / Achievements" value={user.certificationsAchievements} />
-      <ProfileCopySection title="Project / Startup / Initiative" value={user.projectInitiative} />
-      <ProfileCopySection title="Participation Experience" value={user.participationExperience} />
-
-      <ProfileLinks user={user} />
-    </section>
-
-    <aside className="glass-card flat space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="grid h-14 w-14 place-items-center rounded-none border border-white/10 bg-black font-sans text-[18px] font-black text-white">
-          {(user.fullName ?? '?').slice(0, 2).toUpperCase()}
-        </div>
-        <div>
-          <div className="font-sans text-[15px] font-black text-white uppercase">{user.fullName}</div>
-          <Badge tone={ROLE_TONE[user.role]}>{user.role}</Badge>
-        </div>
-      </div>
-
-      <div className="border-t border-white/5 pt-4">
-        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/30 mb-3">Status</div>
-        <Badge tone={user.verificationStatus === 'VERIFIED' ? 'live' : 'warn'}>
-          {titleCase(user.verificationStatus)}
-        </Badge>
-      </div>
-
-      {user.role === 'STUDENT' && (
-        <div className="border-t border-white/5 pt-4">
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/30 mb-3">Team</div>
-          {myTeam ? (
-            <div className="space-y-1">
-              <div className="font-sans text-[14px] font-bold text-white">{myTeam.name}</div>
-              <div className="font-mono text-[11px] text-white/50">{myTeam.domain?.name ?? 'No domain'}</div>
-            </div>
-          ) : (
-            <span className="font-mono text-[12px] text-white/40">Not in a team</span>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-2 border-t border-white/10 pt-3">
-        <Link to="/teams" className="glow-button inline-flex w-full items-center justify-center gap-2">
-          Team Hub <ArrowRight size={14} />
-        </Link>
-      </div>
-    </aside>
-  </div>
-  );
-};
-
+// A labelled data field (label + value pair in profile cards)
 const Field = ({ icon: Icon, label, value }) => (
   <div className="space-y-1">
-    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.1em] sm:tracking-[0.3em] text-white/30">
-      <Icon size={12} /> {label}
+    <div className="flex items-center gap-1.5 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.2em] text-[#4a4458]">
+      <Icon size={11} /> {label}
     </div>
-    <div className="font-mono text-[13px] font-bold text-white/80">{value}</div>
+    <div className="font-mono text-[13px] font-semibold text-[#151320]">{value}</div>
   </div>
 );
 
+// A freeform text section with ink divider
 const ProfileCopySection = ({ title, value }) => {
   if (!value) return null;
   return (
-    <div className="mt-8 border-t border-white/5 pt-6">
-      <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.3em] text-white/30">{title}</div>
-      <p className="font-mono text-[13px] leading-relaxed text-white/60">{value}</p>
+    <div className="mt-7 border-t-2 border-[#151320]/15 pt-5">
+      <div className="mb-2 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.22em] text-[#4a4458]">
+        {title}
+      </div>
+      <p className="font-mono text-[13px] leading-relaxed text-[#151320]/80">{value}</p>
     </div>
   );
 };
 
+// External links row
 const ProfileLinks = ({ user }) => {
   const links = [
     { href: user.linkedinUrl, label: 'LinkedIn', icon: Linkedin },
@@ -164,7 +65,7 @@ const ProfileLinks = ({ user }) => {
   if (!links.length) return null;
 
   return (
-    <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
+    <div className="mt-5 flex flex-wrap items-center gap-2 border-t-2 border-[#151320]/15 pt-4">
       {links.map(({ href, label, icon: Icon }) => (
         <a
           key={label}
@@ -179,6 +80,156 @@ const ProfileLinks = ({ user }) => {
     </div>
   );
 };
+
+// ── Profile tab ───────────────────────────────────────────────────────────
+
+const ProfileTab = ({ user, myTeam }) => {
+  const [editDomains, setEditDomains] = useState(false);
+  return (
+    <div className="grid gap-6 md:grid-cols-3">
+      {/* Main profile card */}
+      <section className="md:col-span-2 bg-[#fffaf0] border-2 border-[#151320] shadow-[0_3px_0_#151320] p-6">
+        <div className="mb-5 flex items-center gap-3 border-b-2 border-[#151320]/15 pb-4">
+          <div className="grid h-8 w-8 place-items-center bg-[#151320] text-[#f3e9d2]">
+            <User size={15} />
+          </div>
+          <h2 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[16px] font-black uppercase tracking-[0.14em] text-[#151320]">
+            Profile Identity
+          </h2>
+        </div>
+
+        <dl className="grid grid-cols-1 gap-y-4 sm:grid-cols-2">
+          <Field icon={User} label="Name" value={user.fullName} />
+          <Field icon={Mail} label="Email" value={user.email} />
+          <Field icon={IdCard} label="Passenger ref" value={user.publicId ?? '—'} />
+          <Field icon={IdCard} label="Registration #" value={user.registrationNo ?? '—'} />
+          <Field icon={GraduationCap} label="Institution" value={user.institution?.name ?? '—'} />
+          <Field icon={Layers} label="Preferred Domain" value={user.domain?.name ?? '—'} />
+          <Field icon={GraduationCap} label="Degree" value={user.degree ?? '—'} />
+          {user.branch ? <Field icon={GraduationCap} label="Branch" value={user.branch} /> : null}
+          <Field icon={BookOpen} label="Year / Semester" value={user.yearSemester ?? '—'} />
+          <Field icon={Mail} label="Phone" value={user.phone ?? '—'} />
+          {user.role === 'STUDENT' ? (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.2em] text-[#4a4458]">
+                <Shirt size={11} /> T-shirt size
+              </div>
+              <TshirtSizePicker key={user.tshirtSize ?? ''} current={user.tshirtSize ?? ''} compact />
+            </div>
+          ) : (
+            <Field icon={Shirt} label="T-shirt size" value={user.tshirtSize ?? '—'} />
+          )}
+          <Field icon={Briefcase} label="Preferred Team Role" value={user.preferredTeamRole ?? '—'} />
+          <Field icon={Award} label="Contribution Areas" value={joinList(user.contributionAreas)} />
+        </dl>
+
+        <ProfileCopySection title="Bio" value={user.bio} />
+
+        {user.role === 'STUDENT' || user.preferredDomainDetails?.length ? (
+          <div className="mt-7 border-t-2 border-[#151320]/15 pt-5">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.22em] text-[#4a4458]">
+                Preferred domains
+              </div>
+              {user.role === 'STUDENT' && (
+                <button
+                  type="button"
+                  className="ghost-button"
+                  onClick={() => setEditDomains(true)}
+                >
+                  Edit domains
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {user.preferredDomainDetails?.length
+                ? user.preferredDomainDetails.map((domain) => (
+                    <Badge key={domain.id} tone="dim">{domain.name}</Badge>
+                  ))
+                : (
+                  <span className="font-mono text-[12px] text-[#b45309]">No domains chosen yet.</span>
+                )}
+            </div>
+            <DomainPicker
+              open={editDomains}
+              onClose={() => setEditDomains(false)}
+              initial={user.preferredDomains ?? []}
+            />
+          </div>
+        ) : null}
+
+        <ProfileCopySection title="Technical Skills" value={user.technicalSkills} />
+        <ProfileCopySection title="Non-Technical Skills" value={user.nonTechnicalSkills} />
+        <ProfileCopySection title="Achievements" value={user.achievements} />
+        <ProfileCopySection title="Hackathon Experience" value={user.hackathonExperience} />
+        <ProfileCopySection title="Certifications / Achievements" value={user.certificationsAchievements} />
+        <ProfileCopySection title="Project / Startup / Initiative" value={user.projectInitiative} />
+        <ProfileCopySection title="Participation Experience" value={user.participationExperience} />
+
+        <ProfileLinks user={user} />
+      </section>
+
+      {/* Profile sidebar */}
+      <aside className="bg-[#fffaf0] border-2 border-[#151320] shadow-[0_3px_0_#151320] p-6 space-y-5 h-fit">
+        {/* Avatar + name */}
+        <div className="flex items-center gap-4">
+          <div className="grid h-14 w-14 place-items-center border-2 border-[#151320] bg-[#151320] font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[18px] font-black text-[#f3e9d2] shadow-[0_2px_0_#000]">
+            {(user.fullName ?? '?').slice(0, 2).toUpperCase()}
+          </div>
+          <div>
+            <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[16px] font-black uppercase tracking-[0.04em] text-[#151320]">
+              {user.fullName}
+            </div>
+            <Badge tone={ROLE_TONE[user.role]}>{user.role}</Badge>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div className="border-t-2 border-[#151320]/15 pt-4">
+          <div className="mb-2 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[10px] font-bold uppercase tracking-[0.28em] text-[#4a4458]">
+            Status
+          </div>
+          <Badge tone={user.verificationStatus === 'VERIFIED' ? 'live' : 'warn'}>
+            {titleCase(user.verificationStatus)}
+          </Badge>
+        </div>
+
+        {/* Team */}
+        {user.role === 'STUDENT' && (
+          <div className="border-t-2 border-[#151320]/15 pt-4">
+            <div className="mb-2 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[10px] font-bold uppercase tracking-[0.28em] text-[#4a4458]">
+              Team
+            </div>
+            {myTeam ? (
+              <div className="space-y-0.5">
+                <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[15px] font-black uppercase text-[#151320]">
+                  {myTeam.name}
+                </div>
+                <div className="font-mono text-[11px] text-[#4a4458]">
+                  {myTeam.domain?.name ?? 'No domain'}
+                </div>
+              </div>
+            ) : (
+              <span className="font-mono text-[12px] text-[#4a4458]">Not in a team</span>
+            )}
+          </div>
+        )}
+
+        {/* CTA */}
+        <div className="border-t-2 border-[#151320]/15 pt-4">
+          <Link
+            to="/teams"
+            className="glow-button inline-flex w-full items-center justify-center gap-2"
+          >
+            Team Hub <ArrowRight size={14} />
+          </Link>
+        </div>
+      </aside>
+    </div>
+  );
+};
+
+// ── Inbox tab ─────────────────────────────────────────────────────────────
 
 const InboxTab = ({ onTeamChanged }) => {
   const toast = useToast();
@@ -196,11 +247,8 @@ const InboxTab = ({ onTeamChanged }) => {
       invites.refetch();
       requests.refetch();
       onTeamChanged?.();
-    } catch (e) {
-      toast.error(e.message);
-    } finally {
-      setBusyId('');
-    }
+    } catch (e) { toast.error(e.message); }
+    finally { setBusyId(''); }
   };
 
   const decline = async (id) => {
@@ -209,11 +257,8 @@ const InboxTab = ({ onTeamChanged }) => {
       await api.post(`/api/invites/${id}/decline`);
       toast.info('Invite declined.');
       invites.refetch();
-    } catch (e) {
-      toast.error(e.message);
-    } finally {
-      setBusyId('');
-    }
+    } catch (e) { toast.error(e.message); }
+    finally { setBusyId(''); }
   };
 
   const cancel = async (id) => {
@@ -222,31 +267,40 @@ const InboxTab = ({ onTeamChanged }) => {
       await api.post(`/api/join-requests/${id}/cancel`);
       toast.info('Request cancelled.');
       requests.refetch();
-    } catch (e) {
-      toast.error(e.message);
-    } finally {
-      setBusyId('');
-    }
+    } catch (e) { toast.error(e.message); }
+    finally { setBusyId(''); }
   };
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
+      {/* Pending invites */}
       <section className="space-y-4">
-        <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.3em] text-white/40">Pending invites</h2>
+        <h2 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[13px] font-black uppercase tracking-[0.22em] text-[#4a4458]">
+          Pending invites
+        </h2>
         {invites.loading && <CardSkeleton rows={2} />}
         {invites.data?.invites.length === 0 && (
-          <Empty icon={Inbox} title="No pending invites" description="Leaders can send you invites from the Teams page." />
+          <Empty
+            icon={Inbox}
+            title="No pending invites"
+            description="Leaders can send you invites from the Teams page."
+          />
         )}
         {invites.data?.invites.map((inv) => (
-          <article key={inv.id} className="glass-card flat space-y-4 border-white/10 hover:border-white">
+          <article
+            key={inv.id}
+            className="bg-[#fffaf0] border-2 border-[#151320] shadow-[0_3px_0_#151320] p-5 space-y-4"
+          >
             <div>
-              <div className="font-sans text-[16px] font-black text-white uppercase tracking-tight">{inv.team.name}</div>
-              <div className="font-mono text-[12px] text-white/40 mt-1">
+              <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[18px] font-black uppercase tracking-[0.04em] text-[#151320]">
+                {inv.team.name}
+              </div>
+              <div className="font-mono text-[12px] text-[#4a4458] mt-1">
                 {inv.team.domain?.name} · led by {inv.team.leader?.fullName}
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-mono text-[11px] text-text-dim">{formatRelative(inv.createdAt)}</span>
+              <span className="font-mono text-[11px] text-[#5c556c]">{formatRelative(inv.createdAt)}</span>
               <div className="flex gap-2">
                 <button
                   className="ghost-button"
@@ -269,17 +323,29 @@ const InboxTab = ({ onTeamChanged }) => {
         ))}
       </section>
 
+      {/* Outgoing requests */}
       <section className="space-y-3">
-        <h2 className="section-label">My outgoing requests</h2>
+        <h2 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[13px] font-black uppercase tracking-[0.22em] text-[#4a4458]">
+          My outgoing requests
+        </h2>
         {requests.loading && <CardSkeleton rows={2} />}
         {requests.data?.requests.length === 0 && (
-          <Empty icon={Inbox} title="No outgoing requests" description="Find a team on the Explore tab and request to join." />
+          <Empty
+            icon={Inbox}
+            title="No outgoing requests"
+            description="Find a team on the Explore tab and request to join."
+          />
         )}
         {requests.data?.requests.map((r) => (
-          <article key={r.id} className="glass-card flat flex items-center justify-between gap-3">
+          <article
+            key={r.id}
+            className="bg-[#fffaf0] border-2 border-[#151320] shadow-[0_3px_0_#151320] p-4 flex items-center justify-between gap-3"
+          >
             <div>
-              <div className="font-sans text-[14px] font-bold">{r.team.name}</div>
-              <div className="font-mono text-[12px] text-text-secondary">{r.team.domain?.name}</div>
+              <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[15px] font-bold uppercase text-[#151320]">
+                {r.team.name}
+              </div>
+              <div className="font-mono text-[12px] text-[#4a4458]">{r.team.domain?.name}</div>
             </div>
             <button
               className="ghost-button inline-flex items-center gap-1.5"
@@ -296,30 +362,48 @@ const InboxTab = ({ onTeamChanged }) => {
   );
 };
 
+// ── Broadcasts tab ────────────────────────────────────────────────────────
+
 const BroadcastsTab = () => {
   const { latest } = useBroadcasts();
   if (latest.length === 0) {
-    return <Empty icon={Megaphone} title="No broadcasts yet" description="Organizer announcements appear here in real time." />;
+    return (
+      <Empty
+        icon={Megaphone}
+        title="No broadcasts yet"
+        description="Organizer announcements appear here in real time."
+      />
+    );
   }
   return (
     <div className="space-y-4">
       {latest.map((b) => (
-        <article key={b.id} className="glass-card flat space-y-4 border-white/10 hover:border-white">
+        <article
+          key={b.id}
+          className="bg-[#fffaf0] border-2 border-[#151320] shadow-[0_3px_0_#151320] p-5 space-y-3"
+        >
+          {/* Yellow top accent strip */}
           <div className="flex items-center justify-between">
-            <Badge tone="live">Signal broadcast</Badge>
-            <span className="font-mono text-[11px] text-white/30">{formatRelative(b.createdAt)}</span>
+            <div className="flex items-center gap-2">
+              <span className="inline-block h-3 w-3 bg-[#f5b800] border border-[#151320]" />
+              <Badge tone="live">Signal broadcast</Badge>
+            </div>
+            <span className="font-mono text-[11px] text-[#5c556c]">{formatRelative(b.createdAt)}</span>
           </div>
-          <p className="font-mono text-[13px] leading-relaxed text-white/80">{b.message}</p>
-          <div className="font-mono text-[11px] text-white/20 uppercase tracking-widest">- {b.sender?.fullName}</div>
+          <p className="font-mono text-[13px] leading-relaxed text-[#151320]">{b.message}</p>
+          <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] uppercase tracking-[0.2em] text-[#4a4458]">
+            — {b.sender?.fullName}
+          </div>
         </article>
       ))}
     </div>
   );
 };
 
+// ── Member details modal ──────────────────────────────────────────────────
+
 const MemberDetailsModal = ({ member, action, busy, onInvite, onClose }) => {
   if (!member) return null;
-
   return (
     <Modal
       open={Boolean(member)}
@@ -344,8 +428,12 @@ const MemberDetailsModal = ({ member, action, busy, onInvite, onClose }) => {
       <div className="space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <div className="font-sans text-[22px] font-bold text-text-primary">{member.fullName}</div>
-            <div className="font-mono text-[12px] text-text-secondary">{member.institution?.name ?? 'No institution'}</div>
+            <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[22px] font-black uppercase text-[#151320]">
+              {member.fullName}
+            </div>
+            <div className="font-mono text-[12px] text-[#4a4458]">
+              {member.institution?.name ?? 'No institution'}
+            </div>
           </div>
           <div className="flex flex-wrap gap-1.5">
             <Badge tone="cyan">{member.domain?.name ?? 'No domain'}</Badge>
@@ -358,26 +446,33 @@ const MemberDetailsModal = ({ member, action, busy, onInvite, onClose }) => {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field icon={Layers} label="Preferred Domain" value={member.domain?.name ?? '-'} />
-          <Field icon={GraduationCap} label="Institution" value={member.institution?.name ?? '-'} />
-          <Field icon={GraduationCap} label="Degree" value={member.degree ?? '-'} />
-          <Field icon={BookOpen} label="Year / Semester" value={member.yearSemester ?? '-'} />
-          <Field icon={Briefcase} label="Preferred Team Role" value={member.preferredTeamRole ?? '-'} />
+          <Field icon={Layers} label="Preferred Domain" value={member.domain?.name ?? '—'} />
+          <Field icon={GraduationCap} label="Institution" value={member.institution?.name ?? '—'} />
+          <Field icon={GraduationCap} label="Degree" value={member.degree ?? '—'} />
+          <Field icon={BookOpen} label="Year / Semester" value={member.yearSemester ?? '—'} />
+          <Field icon={Briefcase} label="Preferred Team Role" value={member.preferredTeamRole ?? '—'} />
           <Field icon={Award} label="Contribution Areas" value={joinList(member.contributionAreas)} />
           <Field icon={Layers} label="Match Score" value={String(member.matchScore ?? 0)} />
           <Field
             icon={Users}
             label="Team"
-            value={member.membership?.team ? `${member.membership.team.name} (${member.membership.team.status})` : 'No team yet'}
+            value={member.membership?.team
+              ? `${member.membership.team.name} (${member.membership.team.status})`
+              : 'No team yet'}
           />
         </div>
 
         {member.preferredDomainDetails?.length ? (
-          <div className="border-t border-white/10 pt-4">
-            <div className="section-label mb-2">Preferred domains</div>
+          <div className="border-t-2 border-[#151320]/15 pt-4">
+            <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] font-bold uppercase tracking-[0.2em] text-[#4a4458] mb-2">
+              Preferred domains
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {member.preferredDomainDetails.map((domain) => (
-                <Badge key={domain.id} tone={member.sharedPreferredDomains?.some((shared) => shared.id === domain.id) ? 'live' : 'dim'}>
+                <Badge
+                  key={domain.id}
+                  tone={member.sharedPreferredDomains?.some((s) => s.id === domain.id) ? 'live' : 'dim'}
+                >
                   {domain.name}
                 </Badge>
               ))}
@@ -387,10 +482,9 @@ const MemberDetailsModal = ({ member, action, busy, onInvite, onClose }) => {
 
         <ProfileCopySection title="Technical Skills" value={member.technicalSkills} />
         <ProfileCopySection title="Non-Technical Skills" value={member.nonTechnicalSkills} />
-
         <ProfileLinks user={member} />
 
-        <div className="border-t border-border-dim pt-4 font-mono text-[11px] text-text-dim">
+        <div className="border-t-2 border-[#151320]/15 pt-4 font-mono text-[11px] text-[#5c556c]">
           {action.reason}
         </div>
       </div>
@@ -398,12 +492,13 @@ const MemberDetailsModal = ({ member, action, busy, onInvite, onClose }) => {
   );
 };
 
+// ── Team details modal ────────────────────────────────────────────────────
+
 const TeamDetailsModal = ({ team, action, busy, onRequest, onClose }) => {
   const detail = useApi(
     () => team ? api.get(`/api/teams/${team.id}`) : Promise.resolve(null),
     [team?.id],
   );
-
   const fullTeam = detail.data?.team ?? team;
 
   return (
@@ -432,11 +527,13 @@ const TeamDetailsModal = ({ team, action, busy, onRequest, onClose }) => {
         <div className="space-y-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <div className="font-sans text-[22px] font-bold text-text-primary">{fullTeam.name}</div>
-              <div className="font-mono text-[12px] text-text-secondary">
+              <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[22px] font-black uppercase text-[#151320]">
+                {fullTeam.name}
+              </div>
+              <div className="font-mono text-[12px] text-[#4a4458]">
                 {fullTeam.domain?.name ?? 'No domain'} · led by {fullTeam.leader?.fullName}
               </div>
-              <div className="font-mono text-[11px] text-text-secondary">Team ref {fullTeam.publicId}</div>
+              <div className="font-mono text-[11px] text-[#5c556c]">Team ref {fullTeam.publicId}</div>
             </div>
             <div className="flex flex-wrap gap-1.5">
               <Badge tone={fullTeam.status === 'FORMING' ? 'cyan' : 'dim'}>{fullTeam.status}</Badge>
@@ -445,25 +542,34 @@ const TeamDetailsModal = ({ team, action, busy, onRequest, onClose }) => {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field icon={Layers} label="Domain" value={fullTeam.domain?.name ?? '-'} />
-            <Field icon={User} label="Leader" value={fullTeam.leader?.fullName ?? '-'} />
-            <Field icon={Users} label="Status" value={fullTeam.status ?? '-'} />
-            <Field icon={Layers} label="Problem statement" value={fullTeam.problemStatement?.title ?? '-'} />
+            <Field icon={Layers} label="Domain" value={fullTeam.domain?.name ?? '—'} />
+            <Field icon={User} label="Leader" value={fullTeam.leader?.fullName ?? '—'} />
+            <Field icon={Users} label="Status" value={fullTeam.status ?? '—'} />
+            <Field icon={Layers} label="Problem statement" value={fullTeam.problemStatement?.title ?? '—'} />
           </div>
 
-          <div className="border-t border-border-dim pt-4">
-            <div className="section-label mb-3">Team members</div>
+          <div className="border-t-2 border-[#151320]/15 pt-4">
+            <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[12px] font-black uppercase tracking-[0.16em] text-[#4a4458] mb-3">
+              Team members
+            </div>
             <div className="grid gap-3 md:grid-cols-2">
               {(fullTeam.members ?? []).map((member) => (
-                <article key={member.user.id} className="rounded-none border border-white/10 bg-white/5 p-3">
+                <article
+                  key={member.user.id}
+                  className="border-2 border-[#151320]/20 bg-[#f3e9d2] p-3"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="font-sans text-[14px] font-bold text-text-primary">{member.user.fullName}</div>
-                      {member.user.email && <div className="font-mono text-[11px] text-text-secondary">{member.user.email}</div>}
+                      <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-bold uppercase text-[#151320]">
+                        {member.user.fullName}
+                      </div>
+                      {member.user.email && (
+                        <div className="font-mono text-[11px] text-[#4a4458]">{member.user.email}</div>
+                      )}
                     </div>
                     <Badge tone={member.role === 'LEADER' ? 'cyan' : 'dim'}>{member.role}</Badge>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     <Badge tone="dim">{member.user.domain?.name ?? 'No domain'}</Badge>
                     {member.user.gender === 'FEMALE' && <Badge tone="live">Female</Badge>}
                     {member.user.isDomainExpert && <Badge tone="warn">Expert</Badge>}
@@ -473,7 +579,7 @@ const TeamDetailsModal = ({ team, action, busy, onRequest, onClose }) => {
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-4 font-mono text-[11px] text-white/30">
+          <div className="border-t-2 border-[#151320]/15 pt-4 font-mono text-[11px] text-[#5c556c]">
             {action?.disabled ? action.label : 'This team is available for join requests.'}
           </div>
         </div>
@@ -484,6 +590,8 @@ const TeamDetailsModal = ({ team, action, busy, onRequest, onClose }) => {
   );
 };
 
+// ── Explore tab ───────────────────────────────────────────────────────────
+
 const ExploreTab = ({ user, myTeam }) => {
   const toast = useToast();
   const [memberFilter, setMemberFilter] = useState('');
@@ -493,15 +601,12 @@ const ExploreTab = ({ user, myTeam }) => {
   const [inviteingId, setInviteingId] = useState('');
   const [requestingTeamId, setRequestingTeamId] = useState('');
 
-  // Everyone, not just domain matches. The server orders by match score, so
-  // students sharing domains come first; the UI adds a divider before the
-  // first student with no shared domain. Loaded 20 at a time as the panel
-  // scrolls; search runs on the server (debounced).
   const [memberSearch, setMemberSearch] = useState('');
   useEffect(() => {
     const t = setTimeout(() => setMemberSearch(memberFilter.trim()), 300);
     return () => clearTimeout(t);
   }, [memberFilter]);
+
   const members = useInfiniteList(
     ({ offset, limit }) => api.get('/api/teams/explore/members', {
       query: { offset, limit, search: memberSearch || undefined },
@@ -522,36 +627,31 @@ const ExploreTab = ({ user, myTeam }) => {
   );
 
   const joinableTeamIds = useMemo(
-    () => new Set((joinable.data?.teams ?? []).map((team) => team.id)),
+    () => new Set((joinable.data?.teams ?? []).map((t) => t.id)),
     [joinable.data],
   );
-
   const pendingRequestTeamIds = useMemo(
-    () => new Set((outgoingRequests.data?.requests ?? []).map((request) => request.team.id)),
+    () => new Set((outgoingRequests.data?.requests ?? []).map((r) => r.team.id)),
     [outgoingRequests.data],
   );
-
   const pendingInviteUserIds = useMemo(
-    () => new Set((pendingInvites.data?.invites ?? []).map((invite) => invite.invitee.id)),
+    () => new Set((pendingInvites.data?.invites ?? []).map((i) => i.invitee.id)),
     [pendingInvites.data],
   );
 
   const { setRootEl: setMembersPanel, setSentinelEl: setMembersSentinel } = members;
   const visibleMembers = members.items;
-  // A "match" shares at least one domain with you (primary or preferred).
-  // Matches always come first (server sort), so the rest start at one index.
-  // Both counts come from the server — they cover pages not loaded yet.
   const memberTotal = members.total;
   const matchCount = members.extra.matchCount ?? 0;
 
   const visibleTeams = useMemo(() => {
-    const all = (teams.data?.teams ?? []).filter((team) => team.id !== myTeam?.id);
+    const all = (teams.data?.teams ?? []).filter((t) => t.id !== myTeam?.id);
     const needle = teamFilter.trim().toLowerCase();
     if (!needle) return all;
-    return all.filter((team) =>
-      [team.name, team.domain?.name, team.leader?.fullName]
+    return all.filter((t) =>
+      [t.name, t.domain?.name, t.leader?.fullName]
         .filter(Boolean)
-        .some((value) => value.toLowerCase().includes(needle)),
+        .some((v) => v.toLowerCase().includes(needle)),
     );
   }, [teams.data, teamFilter, myTeam?.id]);
 
@@ -564,30 +664,14 @@ const ExploreTab = ({ user, myTeam }) => {
   }, [leaderOwnTeam, myTeam]);
 
   const memberActionState = (member) => {
-    if (pendingInviteUserIds.has(member.id)) {
+    if (pendingInviteUserIds.has(member.id))
       return { disabled: true, label: 'Invite pending', reason: 'An invite is already pending for this user.' };
-    }
-    if (member.membership?.team) {
-      return {
-        disabled: true,
-        label: 'Already in a team',
-        reason: `${member.fullName} is already in ${member.membership.team.name}.`,
-      };
-    }
-    if (member.verificationStatus !== 'VERIFIED') {
-      return {
-        disabled: true,
-        label: 'Not verified',
-        reason: 'This user must be verified before they can join a team.',
-      };
-    }
-    if (inviteDisabledReason) {
-      return {
-        disabled: true,
-        label: myTeam ? 'Invite unavailable' : 'Create team first',
-        reason: inviteDisabledReason,
-      };
-    }
+    if (member.membership?.team)
+      return { disabled: true, label: 'Already in a team', reason: `${member.fullName} is already in ${member.membership.team.name}.` };
+    if (member.verificationStatus !== 'VERIFIED')
+      return { disabled: true, label: 'Not verified', reason: 'This user must be verified before they can join a team.' };
+    if (inviteDisabledReason)
+      return { disabled: true, label: myTeam ? 'Invite unavailable' : 'Create team first', reason: inviteDisabledReason };
     return { disabled: false, label: 'Send invite', reason: 'Ready to invite.' };
   };
 
@@ -598,11 +682,8 @@ const ExploreTab = ({ user, myTeam }) => {
       await api.post(`/api/teams/${leaderOwnTeam.id}/invites`, { inviteeId });
       toast.success('Invite sent.');
       pendingInvites.refetch();
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setInviteingId('');
-    }
+    } catch (err) { toast.error(err.message); }
+    finally { setInviteingId(''); }
   };
 
   const sendJoinRequest = async (teamId) => {
@@ -612,57 +693,51 @@ const ExploreTab = ({ user, myTeam }) => {
       toast.success('Join request sent.');
       outgoingRequests.refetch();
       joinable.refetch();
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setRequestingTeamId('');
-    }
+    } catch (err) { toast.error(err.message); }
+    finally { setRequestingTeamId(''); }
   };
 
   const teamActionState = (team) => {
-    if (pendingRequestTeamIds.has(team.id)) {
-      return { disabled: true, label: 'Request pending' };
-    }
-    if (myTeam?.leader?.id === user.id) {
-      return { disabled: true, label: 'You already created your own team' };
-    }
-    if (myTeam) {
-      return { disabled: true, label: 'You are already in a team' };
-    }
-    if (!joinableTeamIds.has(team.id)) {
-      return { disabled: true, label: 'Not accepting requests' };
-    }
+    if (pendingRequestTeamIds.has(team.id)) return { disabled: true, label: 'Request pending' };
+    if (myTeam?.leader?.id === user.id) return { disabled: true, label: 'You already created your own team' };
+    if (myTeam) return { disabled: true, label: 'You are already in a team' };
+    if (!joinableTeamIds.has(team.id)) return { disabled: true, label: 'Not accepting requests' };
     return { disabled: false, label: 'Send request' };
   };
 
+  // Shared card class for explore items
+  const exploreCard = 'bg-[#fffaf0] border-2 border-[#151320] shadow-[0_3px_0_#151320] p-5 flex flex-col justify-between space-y-3 hover:bg-white transition-colors duration-150 min-h-[188px]';
+
   return (
     <div className="grid gap-8 xl:grid-cols-2 xl:items-start">
+      {/* Members panel */}
       <section className="space-y-3 min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="section-label">Available members</h2>
-          <p className="font-mono text-[12px] text-text-secondary">
-            Students sharing your domains first (most shared on top), then everyone else.
-          </p>
-        </div>
+          <div>
+            <h2 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-black uppercase tracking-[0.18em] text-[#4a4458]">
+              Available members
+            </h2>
+            <p className="font-mono text-[12px] text-[#5c556c]">
+              Students sharing your domains first (most shared on top), then everyone else.
+            </p>
+          </div>
           <div className="relative w-full md:max-w-xs">
-            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#4a4458]" />
             <input
-              className="input-glass !pl-10 border-white/10 focus:border-white transition-all bg-black"
-              placeholder="Search operatives..."
+              className="input-glass !pl-10"
+              placeholder="Search passengers..."
               value={memberFilter}
               onChange={(e) => setMemberFilter(e.target.value)}
             />
           </div>
         </div>
 
-        {members.loading || pendingInvites.loading ? <CardSkeleton rows={2} /> : null}
+        {(members.loading || pendingInvites.loading) ? <CardSkeleton rows={2} /> : null}
         {!members.loading && visibleMembers.length === 0 && (
-          <Empty icon={Users} title="No members found" description="No registered student matched your current member search." />
+          <Empty icon={Users} title="No members found" description="No registered student matched your search." />
         )}
-
         {!members.loading && visibleMembers.length > 0 && (
-          <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-white/40">
+          <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] uppercase tracking-[0.18em] text-[#4a4458]">
             {memberTotal} students · {matchCount} share your domains
           </div>
         )}
@@ -671,57 +746,58 @@ const ExploreTab = ({ user, myTeam }) => {
           {visibleMembers.map((member, index) => {
             const action = memberActionState(member);
             const startsOthers = index === matchCount && index > 0;
-
             return (
               <Fragment key={member.id}>
-              {startsOthers && (
-                <div className="flex items-center gap-3 pt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-white/35">
-                  <span className="h-px flex-1 bg-white/10" />
-                  Other students · no shared domains
-                  <span className="h-px flex-1 bg-white/10" />
-                </div>
-              )}
-              <article className={`${EXPLORE_CARD_CLASS} flex flex-col justify-between space-y-3`}>
-                <button
-                  type="button"
-                  className="w-full text-left"
-                  onClick={() => setSelectedMember(member)}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="font-sans text-[15px] font-bold text-text-primary">{member.fullName}</div>
-                      <div className="font-mono text-[12px] text-text-secondary">{member.institution?.name ?? 'No institution'}</div>
-                    </div>
-                    <div className="flex flex-wrap justify-end gap-1.5">
-                      <Badge tone="cyan">{member.domain?.name ?? 'No domain'}</Badge>
-                      {member.sharedPreferredDomains?.length ? <Badge tone="live">Shared: {member.sharedPreferredDomains.length}</Badge> : null}
-                      {member.membership?.team && <Badge tone="dim">In team</Badge>}
-                      {member.verificationStatus !== 'VERIFIED' && <Badge tone="warn">{titleCase(member.verificationStatus)}</Badge>}
-                    </div>
+                {startsOthers && (
+                  <div className="flex items-center gap-3 pt-2 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[10px] uppercase tracking-[0.22em] text-[#4a4458]">
+                    <span className="h-px flex-1 bg-[#151320]/20" />
+                    Other students · no shared domains
+                    <span className="h-px flex-1 bg-[#151320]/20" />
                   </div>
-                </button>
+                )}
+                <article className={exploreCard}>
+                  <button type="button" className="w-full text-left" onClick={() => setSelectedMember(member)}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[16px] font-black uppercase tracking-[0.04em] text-[#151320]">
+                          {member.fullName}
+                        </div>
+                        <div className="font-mono text-[12px] text-[#4a4458]">
+                          {member.institution?.name ?? 'No institution'}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap justify-end gap-1.5">
+                        <Badge tone="cyan">{member.domain?.name ?? 'No domain'}</Badge>
+                        {member.sharedPreferredDomains?.length
+                          ? <Badge tone="live">Shared: {member.sharedPreferredDomains.length}</Badge>
+                          : null}
+                        {member.membership?.team && <Badge tone="dim">In team</Badge>}
+                        {member.verificationStatus !== 'VERIFIED' && (
+                          <Badge tone="warn">{titleCase(member.verificationStatus)}</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </button>
 
-                <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] leading-relaxed text-text-secondary">
-                  <span>{[member.degree, member.branch, member.yearSemester].filter(Boolean).join(' · ') || 'Profile'}</span>
-                  {member.preferredTeamRole && (<><span>·</span><span>{member.preferredTeamRole}</span></>)}
-                  {member.membership?.team && (
-                    <>
-                      <span>·</span>
-                      <span>{member.membership.team.name}</span>
-                    </>
-                  )}
-                </div>
-
-                {member.sharedPreferredDomains?.length ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {member.sharedPreferredDomains.map((domain) => (
-                      <Badge key={domain.id} tone="live">{domain.name}</Badge>
-                    ))}
+                  <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] leading-relaxed text-[#4a4458]">
+                    <span>
+                      {[member.degree, member.branch, member.yearSemester].filter(Boolean).join(' · ') || 'Profile'}
+                    </span>
+                    {member.preferredTeamRole && (<><span>·</span><span>{member.preferredTeamRole}</span></>)}
+                    {member.membership?.team && (
+                      <><span>·</span><span>{member.membership.team.name}</span></>
+                    )}
                   </div>
-                ) : null}
 
-                <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
-                  <div>
+                  {member.sharedPreferredDomains?.length ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {member.sharedPreferredDomains.map((domain) => (
+                        <Badge key={domain.id} tone="live">{domain.name}</Badge>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
                     <button
                       type="button"
                       className="ghost-button inline-flex items-center gap-2"
@@ -729,56 +805,64 @@ const ExploreTab = ({ user, myTeam }) => {
                     >
                       <ExternalLink size={12} /> View details
                     </button>
+                    <button
+                      className="ghost-button inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+                      disabled={action.disabled || inviteingId === member.id}
+                      onClick={() => sendInvite(member.id)}
+                      title={action.reason}
+                    >
+                      {inviteingId === member.id ? <Spinner size={12} /> : <UserPlus size={12} />}
+                      {inviteingId === member.id ? 'Sending...' : action.label}
+                    </button>
                   </div>
-                  <button
-                    className="ghost-button inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={action.disabled || inviteingId === member.id}
-                    onClick={() => sendInvite(member.id)}
-                    title={action.reason}
-                  >
-                    {inviteingId === member.id ? <Spinner size={12} /> : <UserPlus size={12} />}
-                    {inviteingId === member.id ? 'Sending...' : action.label}
-                  </button>
-                </div>
-              </article>
+                </article>
               </Fragment>
             );
           })}
 
-          {/* Scrolling this into view loads the next page. */}
           {!members.loading && members.hasMore && !members.error && (
-            <div ref={setMembersSentinel} className="flex items-center justify-center gap-2 py-4 font-mono text-[11px] uppercase tracking-[0.18em] text-white/35">
+            <div
+              ref={setMembersSentinel}
+              className="flex items-center justify-center gap-2 py-4 font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[11px] uppercase tracking-[0.18em] text-[#4a4458]"
+            >
               {members.loadingMore && <><Spinner size={12} /> Loading more…</>}
             </div>
           )}
           {members.error && (
-            <div className="flex items-center justify-center gap-3 py-4 font-mono text-[11px] text-status-crit">
+            <div className="flex items-center justify-center gap-3 py-4 font-mono text-[11px] text-[#b8102a]">
               Couldn&apos;t load students.
-              <button type="button" className="ghost-button !px-3 !py-1 text-[11px]" onClick={visibleMembers.length ? members.loadMore : members.reload}>
+              <button
+                type="button"
+                className="ghost-button !px-3 !py-1 text-[11px]"
+                onClick={visibleMembers.length ? members.loadMore : members.reload}
+              >
                 Retry
               </button>
             </div>
           )}
           {!members.loading && !members.hasMore && visibleMembers.length > 0 && (
-            <div className="py-3 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-white/25">
+            <div className="py-3 text-center font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[10px] uppercase tracking-[0.22em] text-[#4a4458]/60">
               End of list
             </div>
           )}
         </div>
       </section>
 
+      {/* Teams panel */}
       <section className="space-y-3 min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="section-label">Available teams</h2>
-            <p className="font-mono text-[12px] text-text-secondary">
+            <h2 className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[14px] font-black uppercase tracking-[0.18em] text-[#4a4458]">
+              Available teams
+            </h2>
+            <p className="font-mono text-[12px] text-[#5c556c]">
               Browse every other team and send a join request only when you are not already in one.
             </p>
           </div>
           <div className="relative w-full md:max-w-xs">
-            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/20" />
+            <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#4a4458]" />
             <input
-              className="input-glass !pl-10 border-white/10 focus:border-white transition-all bg-black"
+              className="input-glass !pl-10"
               placeholder="Search teams..."
               value={teamFilter}
               onChange={(e) => setTeamFilter(e.target.value)}
@@ -786,7 +870,7 @@ const ExploreTab = ({ user, myTeam }) => {
           </div>
         </div>
 
-        {teams.loading || joinable.loading || outgoingRequests.loading ? <CardSkeleton rows={2} /> : null}
+        {(teams.loading || joinable.loading || outgoingRequests.loading) && <CardSkeleton rows={2} />}
         {!teams.loading && visibleTeams.length === 0 && (
           <Empty icon={Users} title="No other teams visible" description="Your own team is hidden here. No other team matched your search." />
         )}
@@ -795,16 +879,14 @@ const ExploreTab = ({ user, myTeam }) => {
           {visibleTeams.map((team) => {
             const action = teamActionState(team);
             return (
-              <article key={team.id} className={`${EXPLORE_CARD_CLASS} flex flex-col justify-between space-y-3`}>
-                <button
-                  type="button"
-                  className="w-full text-left"
-                  onClick={() => setSelectedTeam(team)}
-                >
+              <article key={team.id} className={exploreCard}>
+                <button type="button" className="w-full text-left" onClick={() => setSelectedTeam(team)}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="font-sans text-[15px] font-bold text-text-primary">{team.name}</div>
-                      <div className="font-mono text-[12px] text-text-secondary">
+                      <div className="font-['Barlow_Condensed','Arial_Narrow',sans-serif] text-[16px] font-black uppercase tracking-[0.04em] text-[#151320]">
+                        {team.name}
+                      </div>
+                      <div className="font-mono text-[12px] text-[#4a4458]">
                         {team.domain?.name} · led by {team.leader?.fullName}
                       </div>
                     </div>
@@ -815,22 +897,18 @@ const ExploreTab = ({ user, myTeam }) => {
                   </div>
                 </button>
 
-                <div className="font-mono text-[11px] leading-relaxed text-text-dim">
-                  {action.disabled
-                    ? action.label
-                    : 'Open for join requests right now.'}
+                <div className="font-mono text-[11px] leading-relaxed text-[#5c556c]">
+                  {action.disabled ? action.label : 'Open for join requests right now.'}
                 </div>
 
                 <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-1">
-                  <div>
-                    <button
-                      type="button"
-                      className="ghost-button inline-flex items-center gap-2"
-                      onClick={() => setSelectedTeam(team)}
-                    >
-                      <ExternalLink size={12} /> View details
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    className="ghost-button inline-flex items-center gap-2"
+                    onClick={() => setSelectedTeam(team)}
+                  >
+                    <ExternalLink size={12} /> View details
+                  </button>
                   <button
                     className="glow-button inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={action.disabled || requestingTeamId === team.id}
@@ -865,6 +943,8 @@ const ExploreTab = ({ user, myTeam }) => {
   );
 };
 
+// ── Page entry ────────────────────────────────────────────────────────────
+
 export const DashboardPage = () => {
   const { user } = useAuth();
   const [tab, setTab] = useState('profile');
@@ -875,7 +955,6 @@ export const DashboardPage = () => {
   const { refetch: refetchTeam } = myTeam;
   const u = me.data?.user ?? user;
 
-  // Domains saved anywhere (the banner or the profile) refresh this page.
   useEffect(() => {
     window.addEventListener(DOMAINS_SAVED_EVENT, refetchMe);
     return () => window.removeEventListener(DOMAINS_SAVED_EVENT, refetchMe);
@@ -887,20 +966,24 @@ export const DashboardPage = () => {
   }, [refetchTeam, refetchMe]);
 
   return (
-    <section className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
+    <section className="txp-station-app mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
       <PageHeader
         kicker={`Session Active: ${u.fullName.split(' ')[0]}`}
         title="Mission Dashboard"
         description="Your profile, team status, inbox and live signals."
         actions={
           u.role === 'STUDENT'
-            ? <Link to="/teams" className="glow-button inline-flex items-center gap-2 px-6"><Users size={14} /> <span>Team Hub</span></Link>
+            ? (
+              <Link to="/teams" className="glow-button inline-flex items-center gap-2 px-6">
+                <Users size={14} /> <span>Team Hub</span>
+              </Link>
+            )
             : null
         }
       />
 
       <Tabs
-        className="mb-6"
+        className="mb-8"
         value={tab}
         onChange={setTab}
         items={[
@@ -911,7 +994,7 @@ export const DashboardPage = () => {
         ]}
       />
 
-      <div className="fade-in">
+      <div className="fade-in mt-8">
         {me.loading || (u.role === 'STUDENT' && myTeam.loading)
           ? <CardSkeleton rows={4} />
           : tab === 'profile'

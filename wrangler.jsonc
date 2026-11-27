@@ -3,7 +3,7 @@
   "name": "techxpress",
   "main": "worker/index.js",
   "compatibility_date": "2026-11-24",
-  // Static files from `npm run build`: the site at /, the portal at /vortex/.
+  // Static files from `npm run build`: the site at /, the app shell at /_app/.
   // "none" means unmatched paths reach worker/index.js, which picks the right
   // single-page app shell.
   "assets": {

@@ -5,10 +5,36 @@ import { cn } from '../../utils/cn.js';
 // pills: one wrapping row, alphabetical. Picked pills show their order (#1 is
 // the primary domain); after `max` picks the rest are disabled.
 //
-// Props: domains [{ id, name }], value [domainId] (ordered), max, onToggle(id)
-export const DomainPicker = ({ domains, value, max = 4, onToggle }) => {
+// Props: domains [{ id, name }], value [domainId] (ordered), max, onToggle(id), variant ('dark' | 'station')
+export const DomainPicker = ({ domains, value, max = 4, onToggle, variant = 'dark' }) => {
   const sorted = useMemo(() => [...domains].sort((a, b) => a.name.localeCompare(b.name)), [domains]);
   const full = value.length >= max;
+
+  if (variant === 'station') {
+    return (
+      <div className="reg-pill-grid">
+        {sorted.map((d) => {
+          const rank = value.indexOf(d.id);
+          const active = rank !== -1;
+          const disabled = !active && full;
+          return (
+            <button
+              key={d.id}
+              type="button"
+              disabled={disabled}
+              aria-pressed={active}
+              onClick={() => onToggle(d.id)}
+              title={disabled ? `You've picked ${max}. Remove one to choose another.` : undefined}
+              className={`reg-pill${active ? ' active' : ''}`}
+            >
+              <span>{d.name}</span>
+              {active ? <span className="pill-rank">#{rank + 1}</span> : null}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-wrap gap-2.5 md:gap-3">

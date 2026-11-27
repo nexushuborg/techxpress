@@ -4,13 +4,29 @@
 // (assets.not_found_handling = "none"), so this only sees requests that
 // matched no file. It sends page navigations to the right single-page app:
 //
-//   /vortex, /vortex/*  ->  /vortex/   (VORTEX portal, its own index.html)
-//   everything else     ->  /          (train experience)
+//   /login, /register, /dashboard, /teams, /admin/*, ...  ->  /_app/  (app shell)
+//   everything else                                       ->  /       (train experience)
 //
 // Requests for missing files (a .js, .png, ...) get a real 404 rather than
 // an HTML page, so broken asset links fail loudly instead of silently.
 
-const PORTAL_PREFIX = '/vortex';
+const PORTAL_ROUTES = new Set([
+  '/login',
+  '/register',
+  '/dashboard',
+  '/teams',
+  '/admin',
+]);
+
+const PORTAL_PREFIXES = ['/admin/'];
+
+const isPortalPath = (pathname) => {
+  const normalized = pathname.length > 1 && pathname.endsWith('/')
+    ? pathname.slice(0, -1)
+    : pathname;
+  if (PORTAL_ROUTES.has(normalized)) return true;
+  return PORTAL_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+};
 
 const isPageRequest = (request, pathname) => {
   if (request.method !== 'GET' && request.method !== 'HEAD') return false;
@@ -29,11 +45,10 @@ export default {
       return new Response('Not found', { status: 404 });
     }
 
-    const inPortal = pathname === PORTAL_PREFIX || pathname.startsWith(`${PORTAL_PREFIX}/`);
     // Fetch the directory path, not ".../index.html": the assets binding
     // redirects index.html to the bare directory under its default
     // html_handling, and we want the page itself.
-    const shell = new URL(inPortal ? `${PORTAL_PREFIX}/` : '/', url);
+    const shell = new URL(isPortalPath(pathname) ? '/_app/' : '/', url);
     return env.ASSETS.fetch(new Request(shell, request));
   },
 };
